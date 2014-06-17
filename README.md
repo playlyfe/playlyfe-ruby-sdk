@@ -21,7 +21,7 @@ Playlyfe.start(
 )
 ```
 If you haven't created a client for your game yet just head over to
-(playlyfe.com) and login, and goto config and create one
+[Playlyfe](playlyfe.com) and login, and go to config and create one
 
 The Playlyfe Singleton class allows you to make rest api calls like GET, POST, .. etc
 Example: GET

@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.email       = 'peter@playlyfe.com'
   s.files       = ["Rakefile", "lib/playlyfe.rb"]
   s.test_files = ["test/test.rb"]
-  s.homepage    = 'https://rubygems.org/gems/playlyfe'
+  s.homepage    = 'https://github.com/pyros2097/playlyfe-ruby-sdk'
   s.require_paths = ["lib"]
   s.add_runtime_dependency "oauth2", ">= 0.9.4"
   s.add_runtime_dependency "json", ">= 1.8.1"
