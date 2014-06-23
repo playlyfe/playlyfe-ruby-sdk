@@ -1,0 +1,29 @@
+<div class="container">
+<div class="panel panel-default">
+  <div class="panel-body">
+    <h1><center><%= @process_name.humanize %></center></h1>
+  </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+      <h2 class="panel-title">Triggers</h2>
+    </div>
+    <div class="panel-body">
+      <ul class="list-group">
+      <% @triggers.each do |trigger| %>
+        <%= form_tag(controller: "welcome", action: "play", method: "post") do %>
+          <%= hidden_field_tag :process_id, @process_id %>
+          <%= hidden_field_tag :trigger_id, trigger["trigger"] %>
+          <li class="list-group-item">
+            <p>
+              <%= trigger["trigger"] %>
+              <%= submit_tag "Play", class: "btn btn-primary"%>
+            </p>
+          </li>
+        <% end %>
+      <% end %>
+      </ul>
+    </div>
+  </div>
+</div>
+<h2><%= link_to "back", :controller => "welcome", :action => "home"%></h2>

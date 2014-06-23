@@ -1,0 +1,80 @@
+<div class="container">
+<div class="panel panel-default">
+  <div class="panel-body">
+    <%= image_tag "/image/user", :align => "left" %>
+    <h1><%= @player.username.humanize %>'s Profile</h1>
+    <%= link_to "logout", :controller => "welcome", :action => "logout" %>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h2 class="panel-title">Scores</h2>
+      </div>
+      <div class="panel-body">
+        <ul class="list-group">
+        <% @player.scores.each do |score| %>
+          <li class="list-group-item">
+            <span class="badge"><%= score["value"] %></span>
+            <%= score["metric"]["name"] %>
+          </li>
+        <% end %>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h2 class="panel-title">My Modules</h2>
+      </div>
+    <div class="panel-body">
+      <ul class="list-group">
+      <% @player.definitions.each do |definition| %>
+        <%= form_tag(controller: "welcome", action: "start", method: "post") do %>
+          <li class="list-group-item">
+            <h4 class="list-group-item-heading">
+              <%= hidden_field_tag :definition_id, definition["id"] %>
+              <%= hidden_field_tag :definition_name, definition["name"] %>
+              <%= definition["name"]%>
+            </h4>
+            <p class="list-group-item-text">
+              <%= definition["description"] %>
+            </p>
+            <%= submit_tag "Start", class: "btn btn-primary"%>
+          </li>
+        <% end %>
+      <% end %>
+      </ul>
+     </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h2 class="panel-title">My Courses</h2>
+      </div>
+      <div class="panel-body">
+        <ul class="list-group">
+        <% @player.processes.each do |process| %>
+          <%= form_tag(controller: "welcome", action: "trigger", method: "post") do %>
+            <li class="list-group-item">
+              <h4 class="list-group-item-heading">
+                <%= hidden_field_tag :process_id, process["id"] %>
+                <%= hidden_field_tag :process_name, process["name"] %>
+                <%= process["name"] %>
+              </h4>
+              <p class="list-group-item-text">State: <%= process["state"] %></p>
+              <% if not process["state"] == "COMPLETED" %>
+                <%= submit_tag "View Courses", class: "btn btn-primary"%>
+              <% end %>
+            </li>
+          <% end %>
+        <% end %>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
