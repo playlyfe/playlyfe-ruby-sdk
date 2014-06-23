@@ -1,13 +1,16 @@
 playlyfe-ruby-sdk
 =================
-
-The playlyfe ruby sdk gem
-You can get the gem at RubyGems [Playlyfe](https://rubygems.org/gems/playlyfe)
+The playlyfe ruby gem
+You can get the gem at RubyGems [Get Playlyfe Gem](https://rubygems.org/gems/playlyfe)
+To understand how the complete api works
+Checkout [The Playlyfe Api](http://dev.playlyfe.com/docs/api) for more information
 
 Using
 ------
 Just add it to your Gemfile
-```gem 'playlyfe'```
+```ruby
+gem 'playlyfe'
+```
 and do a bundle install
 
 Documentation
@@ -16,12 +19,12 @@ You can initiate a client by giving the client_id and client_secret params
 This will authorize a client and get the token
 ```ruby
 Playlyfe.start(
-  client_id: 'Your Playlyfe client id',
-  client_secret: 'Your Playlyfe client secret'
+  client_id: 'Your Playlyfe game client id',
+  client_secret: 'Your Playlyfe game client secret'
 )
 ```
-If you haven't created a client for your game yet just head over to
-[Playlyfe](playlyfe.com) and login, and go to config and create one
+> If you haven't created a client for your game yet just head over to
+[Playlyfe](http://playlyfe.com) and login into your account, and go to config and create one
 
 The Playlyfe Singleton class allows you to make rest api calls like GET, POST, .. etc
 Example: GET
@@ -60,5 +63,34 @@ Playlyfe.post(
 )
 ```
 
-To understard how the complete api works
-Checkout the [Playlyfe Api](http://dev.playlyfe.com/docs/api) for more information
+Using it in Rails (any version)
+-------------------------------
+Add playlyfe gem to your Gemfile
+and just at the end of your ApplicationController class add this
+```ruby
+Playlyfe.start(
+  client_id: 'Your Playlyfe game client id',
+  client_secret: 'Your Playlyfe game client secret'
+)
+```
+Now you should be able to access the Playlyfe api across all your
+controllers.
+For Images create a proxy route which can be used to get the images
+and you can directly refer to the urls of the image
+```ruby
+def image
+    puts params
+    response = Playlyfe.get(
+      url: "/assets/players/#{session[:player_id]}",
+      player: session[:player_id],
+      raw: true
+    )
+    send_data response.body, :type =>'image/png', :disposition => 'iniline'
+end
+
+# In routes.rb add
+get 'image/:filename' => 'welcome#image'
+
+# Use it in your views like
+<%= image_tag "/image/user", :align => "left" %>
+```
