@@ -1,21 +1,32 @@
 playlyfe-ruby-sdk
 =================
-The playlyfe ruby gem
-You can get the gem at RubyGems [Get Playlyfe Gem](https://rubygems.org/gems/playlyfe)
-To understand how the complete api works
-Checkout [The Playlyfe Api](http://dev.playlyfe.com/docs/api) for more information
+You can get the gem at [RubyGems](https://rubygems.org/gems/playlyfe)  
+To understand how the complete api works checkout [The Playlyfe Api](http://dev.playlyfe.com/docs/api) for more information
 
-Using
-------
+Install
+-------
 Just add it to your Gemfile
-```ruby
+```ruby 
 gem 'playlyfe'
 ```
 and do a bundle install
 
-Documentation
---------------
-You can initiate a client by giving the client_id and client_secret params
+Using
+-----
+### Creating a Client
+  There are 2 kinds of oauth flows you can use in the sdk the client credentials flow and the authcode flow.
+  If you haven't created a client for your game yet just head over to [Playlyfe](http://playlyfe.com) and login into      your account, and go to the game settings and click on client
+  
+  1.ClientCredentials Flow
+    Create a whitelabel client
+  2.AuthCode Flow
+    Create a backend client and specify the redirect uri this will be the url where you will be redirected to
+    to get the token
+    
+  And then note down the client id and client secret you will need it later for using it in the sdk
+
+### Initializing the client
+You can initialize the playlyfe client by giving the client_id and client_secret params
 This will authorize a client and get the token
 ```ruby
 Playlyfe.start(
@@ -23,9 +34,6 @@ Playlyfe.start(
   client_secret: 'Your Playlyfe game client secret'
 )
 ```
-> If you haven't created a client for your game yet just head over to
-[Playlyfe](http://playlyfe.com) and login into your account, and go to config and create one
-
 The Playlyfe Singleton class allows you to make rest api calls like GET, POST, .. etc
 Example: GET
 ```ruby
