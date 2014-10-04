@@ -15,13 +15,11 @@ Using
 -----
 ### Creating a Client
   There are 2 kinds of oauth flows you can use in the sdk the client credentials flow and the authcode flow.
-  If you haven't created a client for your game yet just head over to [Playlyfe](http://playlyfe.com) and login into      your account, and go to the game settings and click on client
-  
-  1.ClientCredentials Flow
-    Create a whitelabel client
-  2.AuthCode Flow
-    Create a backend client and specify the redirect uri this will be the url where you will be redirected to
-    to get the token
+  If you haven't created a client for your game yet just head over to [Playlyfe](http://playlyfe.com) and login into      your account, and go to the game settings and click on client  
+  **1.ClientCredentials Flow**    
+    In the client page click on whitelabel client    
+  **2.AuthCode Flow**  
+    In the client page click on backend client and specify the redirect uri this will be the url where you will be          redirected to get the token
     
   And then note down the client id and client secret you will need it later for using it in the sdk
 
