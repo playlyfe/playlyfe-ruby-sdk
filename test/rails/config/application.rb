@@ -29,8 +29,9 @@ module Demo2
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
     Playlyfe.init(
-      client_id: "NjZlZWFiMWEtN2ZiOC00YmVmLTk2YWMtNDEyYTNmMjQ5NDBl",
-      client_secret: "NGRhMWJlYzUtODJiNS00ZTdkLTgzNTctMTQyMGEzNTljN2MwMTU2MGM3NTAtZjZiZS0xMWUzLTgxZjYtNmZhMGYyMzRkZGU3"
+      client_id: "Zjc0MWU0N2MtODkzNS00ZWNmLWEwNmYtY2M1MGMxNGQ1YmQ4",
+      client_secret: "YzllYTE5NDQtNDMwMC00YTdkLWFiM2MtNTg0Y2ZkOThjYTZkMGIyNWVlNDAtNGJiMC0xMWU0LWI2NGEtYjlmMmFkYTdjOTI3",
+      test: true
     )
   end
 end
