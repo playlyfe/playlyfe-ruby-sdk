@@ -1,20 +1,31 @@
 require 'json'
 require 'rest_client'
 
+class PlaylyfeError < StandardError
+  attr_reader :name, :message
+  def initialize(res)
+    message = []
+    res = JSON.parse(res)
+    @name = res['error']
+    @message = res['error_description']
+    message << "#{@code}: #{@description}"
+    super(message.join("\n"))
+  end
+end
+
 class Playlyfe
   @@client = nil
   @@token = nil
   @@api = 'https://api.playlyfe.com/v1'
   @@debug = true
   @@type = 'client'
-  @@test = false
 
   # You can initiate a client by giving the client_id and client_secret params
   # This will authorize a client and get the token
   #
   # @param [Hash] options the options to make the request with
   # @options opts [Boolean] :type where where type can be 'code', 'client' for
-  #    for the oauth flows auth code flow and client credentials flow
+  #    for the oauth2 auth code flow and client credentials flow
   def self.init(options = {})
     puts 'Playlyfe Initializing...............................................'
     @@type = options[:type] || 'client'
@@ -22,11 +33,11 @@ class Playlyfe
     @@secret = options[:client_secret]
     @@store = options[:store]
     @@retrieve = options[:retrieve]
-    @@test = options[:test]
-    if @@test
-      #RestClient.log = Logger.new(STDOUT)
+    if @@store.nil?
+      @@store = lambda { |token| puts 'Storing Token' }
     end
     self.get_access_token()
+    #RestClient.log = Logger.new(STDOUT)
     # case options[:type]
     #   when 'code'
     #     if options[:redirect_uri].nil?
@@ -59,16 +70,12 @@ class Playlyfe
       expires_at ||= Time.now.to_i + access_token['expires_in']
       access_token.delete('expires_in')
       access_token['expires_at'] = expires_at
-      if @@test == true
+      @@store.call access_token
+      if @@retrieve.nil?
         @@retrieve = lambda { return access_token }
-      else
-        @@store.call access_token
       end
     rescue => e
-      puts e
-      puts 'Could not get Access token. Please check if you client_id and client_secret are correct'
-      puts e.response
-      raise e
+      raise PlaylyfeError.new(e.response)
     end
   end
 
@@ -108,7 +115,7 @@ class Playlyfe
       )
       JSON.parse(res.body)
     rescue => e
-      puts e.response
+      raise PlaylyfeError.new(e.response)
     end
   end
 
@@ -120,7 +127,7 @@ class Playlyfe
   def self.post(url, body = {})
     access_token = @@retrieve.call
     self.check_expired(access_token)
-    if body['player_id'].nil?
+    if body.has_key? :player_id
       player_id = body[:player_id]
       body.delete('player_id')
       begin
@@ -131,7 +138,7 @@ class Playlyfe
         )
         return JSON.parse(res.body)
       rescue => e
-        puts e.response
+        raise PlaylyfeError.new(e.response)
       end
     else
       begin
@@ -142,7 +149,7 @@ class Playlyfe
         )
         return JSON.parse(res.body)
       rescue => e
-        puts e.response
+        raise PlaylyfeError.new(e.response)
       end
     end
   end
