@@ -93,7 +93,7 @@ class Playlyfe
     end
   end
 
-  def self.get_auth_url
+  def self.get_login_url
     query = { response_type: 'code', redirect_uri: @@redirect_uri, client_id: @@id }
     "https://playlyfe.com/auth?#{self.hash_to_query(query)}"
   end

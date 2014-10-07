@@ -9,6 +9,10 @@ Ruby >= 1.9.3
 
 Install
 ----------
+```ruby
+gem install playlyfe
+```
+or if you are using rails  
 Just add it to your Gemfile
 ```ruby
 gem 'playlyfe'
@@ -18,27 +22,20 @@ and do a bundle install
 Using
 -----
 ### Create a client
-  There are 2 kinds of oauth flows you can use in the sdk the client credentials flow and the auth code flow.
-  If you haven't created a client for your game yet just head over to [Playlyfe](http://playlyfe.com) and login into your account, and go to the game settings and click on client
-  **1.ClientCredentials Flow**  
+  There are 2 kinds of oauth flows you can use in the sdk i.e. the client credentials flow and the authorization code flow.  
+  If you haven't created a client for your game yet just head over to [Playlyfe](http://playlyfe.com) and login into your account, and go to the game settings and click on client  
+  **1.Client Credentials Flow**  
     In the client page click on whitelabel client  
-  **2.AuthCode Flow**  
+    ![alt text](https://github.com/pyros2097/playlyfe-ruby-sdk/raw/master/images/client.png "")
+
+  **2.Authorization Code Flow**  
     In the client page click on backend client and specify the redirect uri this will be the url where you will be redirected to get the token
+    ![alt text](https://github.com/pyros2097/playlyfe-ruby-sdk/raw/master/images/auth.png "")
 
 > Note: If you want to test the sdk in staging you can click the Test Client button. You need to pass the player_id in the query in every request also.
 
   And then note down the client id and client secret you will need it later for using it in the sdk
 
-### Initialize the client
-You can initialize the playlyfe client by giving the client_id and client_secret params
-This will authorize a client and get the token
-```ruby
-Playlyfe.init(
-  client_id: 'Your Playlyfe game client id',
-  client_secret: 'Your Playlyfe game client secret'
-  type: 'client'
-)
-```
 The Playlyfe class allows you to make rest api calls like GET, POST, .. etc
 Example: GET
 ```ruby
@@ -88,7 +85,7 @@ Playlyfe.start(
   type: 'client'
 )
 ```
-### 2.Auth Code Flow
+### 2.Authorization Code Flow
 ```ruby
 Playlyfe.start(
   client_id: 'Your Playlyfe game client id',
@@ -97,8 +94,7 @@ Playlyfe.start(
   redirect_uri: 'https://example.com/oauth/callback'
 )
 ```
-In this flow then you need a route/controller which will allow your user to login using the playlyfe platform and you need to call this in the controller
-to which redirect happens. In that route you will get the authorization code so that the sdk can get the access token
+In this flow then you need a view which will allow your user to redirect to the login using the playlyfe platform. In that route you will get the authorization code so that the sdk can get the access token
 ```ruby
 Playlyfe.exchange_code(code)
 ```
@@ -187,24 +183,25 @@ Playlyfe.delete(
     body: {} # The data which will specify which component you will want to delete in the route
 )
 ```
-## Get Auth Url
+## Get Login Url
 ```ruby
-Playlyfe.get_auth_url()
-#This will return the url to which the user needs to be redirected to so that he can login. You can use this directly in your views.
+Playlyfe.get_login_url()
+#This will return the url to which the user needs to be redirected for the user to login. You can use this directly in your views.
 ```
 
 ## Exchange Code
 ```ruby
 Playlyfe.exchange_code(code)
 #This is used in the auth code flow so that the sdk can get the access token.
-#Before any request to the playlyfe api is made this has to be called atleast once. This should be called in the the route/controller which you specified in your redirect_uri
+#Before any request to the playlyfe api is made this has to be called atleast once. 
+#This should be called in the the route/controller which you specified in your redirect_uri
 ```
 
 ## Errors
 A ```PlaylyfeError``` is thrown whenever an error occurs in each call. The error contains a name and message field which can be used to determine the type of error that occurred.
 
-Rails code demostrating using the auth code flow
-================================================
+Rails code demostrating using the authorization code flow
+---------------------------------------------------------
 A typical rails app would look something like this
 ```ruby
 class Application < Rails::Application
@@ -215,8 +212,9 @@ class Application < Rails::Application
       redirect_uri: 'http://localhost:3000/welcome/index'
     )
 end
-
+```
 ### controllers/welcome_controller.rb
+```ruby
 class WelcomeController < ApplicationController
 
   def index
@@ -234,24 +232,33 @@ class WelcomeController < ApplicationController
     @players = Playlyfe.get(route: '/players', query: { player_id: 'johny' })
   end
 end
-
+```
 ### views/welcome/index.html.erb
+```ruby
 <div class="container">
 <div class="form-signin">
 Please sign in using the Playlyfe Platform
 <a href=<%= Playlyfe.get_auth_url() %>> Login </a>
 </div>
 </div>
-
+```
 ### views/welcome/home.html.erb
+```ruby
 <div class="container">
-<div class="form-signin">
-Please sign in using the Playlyfe Platform
-<a href=<%= Playlyfe.get_auth_url() %>> Login </a>
+<div class="panel panel-default">
+<% @players["data"].each do |player| %>
+    <li class="list-group-item">
+      <p>
+        <%= player["id"] %>
+        <%= player["alias"] %>
+      </p>
+    </li>
+<% end %>
 </div>
 </div>
-
+```
 ### config/routes.rb
+```ruby
 Rails.application.routes.draw do
   root 'welcome#index'
   get 'welcome/index'
@@ -261,7 +268,7 @@ end
 
 License
 =======
-Playlyfe Ruby SDK v0.5.1  
+Playlyfe Ruby SDK v0.5.2  
 http://dev.playlyfe.com/  
 Copyright(c) 2013-2014, Playlyfe Technologies, developers@playlyfe.com  
 
