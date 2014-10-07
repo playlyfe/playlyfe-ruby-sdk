@@ -203,6 +203,7 @@ A ```PlaylyfeError``` is thrown whenever an error occurs in each call. The error
 Rails code demostrating using the authorization code flow
 ---------------------------------------------------------
 A typical rails app would look something like this
+This is where you will initialize the sdk with your client_id and client_secret
 ```ruby
 class Application < Rails::Application
     Playlyfe.init(
@@ -214,6 +215,7 @@ class Application < Rails::Application
 end
 ```
 ### controllers/welcome_controller.rb
+This is where we check if the user successfully logged in and set the authorization code using Playlyfe.exchange_code
 ```ruby
 class WelcomeController < ApplicationController
 
@@ -234,6 +236,7 @@ class WelcomeController < ApplicationController
 end
 ```
 ### views/welcome/index.html.erb
+This is the main index page. It will redirect the user to login into playlyfe
 ```ruby
 <div class="container">
 <div class="form-signin">
@@ -243,6 +246,7 @@ Please sign in using the Playlyfe Platform
 </div>
 ```
 ### views/welcome/home.html.erb
+This will display the home page after a user logs in. Here it displays all the players in the game
 ```ruby
 <div class="container">
 <div class="panel panel-default">
@@ -258,6 +262,8 @@ Please sign in using the Playlyfe Platform
 </div>
 ```
 ### config/routes.rb
+There are 2 routes here  
+The index route is for the login and the home route is for the user after logging in
 ```ruby
 Rails.application.routes.draw do
   root 'welcome#index'
