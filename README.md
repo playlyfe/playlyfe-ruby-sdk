@@ -1,6 +1,6 @@
 playlyfe-ruby-sdk [![Gem Version](https://badge.fury.io/rb/playlyfe.svg)](http://badge.fury.io/rb/playlyfe)
 =================
-You can get the gem at [RubyGems](https://rubygems.org/gems/playlyfe)
+You can get the gem at [RubyGems](https://rubygems.org/gems/playlyfe)  
 To understand how the complete api works checkout [The Playlyfe Api](http://dev.playlyfe.com/docs/api) for more information
 
 Requires
@@ -18,14 +18,14 @@ and do a bundle install
 Using
 -----
 ### Create a client
-  There are 2 kinds of oauth flows you can use in the sdk the client credentials flow and the authcode flow.
+  There are 2 kinds of oauth flows you can use in the sdk the client credentials flow and the auth code flow.
   If you haven't created a client for your game yet just head over to [Playlyfe](http://playlyfe.com) and login into your account, and go to the game settings and click on client
-  **1.ClientCredentials Flow**
-    In the client page click on whitelabel client
-  **2.AuthCode Flow**
+  **1.ClientCredentials Flow**  
+    In the client page click on whitelabel client  
+  **2.AuthCode Flow**  
     In the client page click on backend client and specify the redirect uri this will be the url where you will be redirected to get the token
 
-> Note: If you want to test the sdk in staging you can click the Test Client button
+> Note: If you want to test the sdk in staging you can click the Test Client button. You need to pass the player_id in the query in every request also.
 
   And then note down the client id and client secret you will need it later for using it in the sdk
 
@@ -78,8 +78,9 @@ Playlyfe.post(
 Using it in Rails (any version)
 -------------------------------
 Add playlyfe gem to your Gemfile
+In your Application class add this so the Playlyfe SDK will be initialized at the start of your app.
 ### 1.Client Credentials Flow
-If you are using the client credentials flow then at the end of your Application class add this so the Playlyfe SDK will be initialized at the start of your app. In this flow you will always have to pass the player_id in the query param  for every request.
+
 ```ruby
 Playlyfe.start(
   client_id: 'Your Playlyfe game client id',
@@ -88,7 +89,6 @@ Playlyfe.start(
 )
 ```
 ### 2.Auth Code Flow
-If you are using the auth code flow then you need a route/controller which will allow your user to login the user using the playlyfe platform and you need to initialize the sdk in that route and you need to pass in the other options type and redirect_uri
 ```ruby
 Playlyfe.start(
   client_id: 'Your Playlyfe game client id',
@@ -97,6 +97,12 @@ Playlyfe.start(
   redirect_uri: 'https://example.com/oauth/callback'
 )
 ```
+In this flow then you need a route/controller which will allow your user to login using the playlyfe platform and you need to call this in the controller
+to which redirect happens. In that route you will get the authorization code so that the sdk can get the access token
+```ruby
+Playlyfe.exchange_code(code)
+```
+
 Now you should be able to access the Playlyfe api across all your
 controllers.
 For Images create a proxy route which can be used to get the images
@@ -104,11 +110,11 @@ and you can directly refer to the urls of the image
 ```ruby
 def image
     response = Playlyfe.get(
-      url: "/assets/players/#{session[:player_id]}",
+      route: "/assets/players/#{session[:player_id]}",
       query: { player_id: session[:player_id] }
       raw: true
     )
-    send_data response.body, :type =>'image/png', :disposition => 'iniline'
+    send_data response, :type =>'image/png', :disposition => 'iniline'
 end
 
 # In routes.rb add
@@ -120,6 +126,7 @@ get 'image/:filename' => 'welcome#image'
 Documentation
 -------------------------------
 ## Init
+You can initiate a client by giving the client_id and client_secret params
 ```ruby
 Playlyfe.init(
     client_id: ''
@@ -128,7 +135,7 @@ Playlyfe.init(
     redirect_uri: 'The url to redirect to' #only for auth code flow
     store: lambda { |token| } # The lambda which will persist the access token to a database. You have to persist the token to a database if you want the access token to remain the same in every request
     retrieve: lambda { return token } # The lambda which will retrieve the access token. This is called internally by the sdk on every request so the 
-    the access token can be persisted between requests
+    #the access token can be persisted between requests
 )
 ```
 In development the sdk caches the access token in memory so you dont need to provide the store and retrieve lambdas. But in production it is highly recommended to persist the token to a database. It is very simple and easy to do it with redis. You can see the test cases for more examples.
@@ -180,24 +187,31 @@ Playlyfe.delete(
     body: {} # The data which will specify which component you will want to delete in the route
 )
 ```
+## Exchange Code
+```ruby
+Playlyfe.exchange_code(code)
+This is used in the auth code flow so that the sdk can get the access token.
+Before any request to the playlyfe api is made this has to be called atleast once. This should be called in the the route/controller which you specified in your redirect_uri
+```
+
 ## Errors
 A ```PlaylyfeError``` is thrown whenever an error occurs in each call. The error contains a name and message field which can be used to determine the type of error that occurred.
 
 License
 =======
-Playlyfe Ruby SDK v0.4.5
-http://dev.playlyfe.com/
-Copyright(c) 2013-2014, Playlyfe Technologies, developers@playlyfe.com
+Playlyfe Ruby SDK v0.5.0  
+http://dev.playlyfe.com/  
+Copyright(c) 2013-2014, Playlyfe Technologies, developers@playlyfe.com  
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+furnished to do so, subject to the following conditions:  
 
 The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+all copies or substantial portions of the Software.  
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,

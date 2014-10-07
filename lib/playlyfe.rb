@@ -20,17 +20,6 @@ end
 class Playlyfe
   @@api = 'https://api.playlyfe.com/v1'
 
-  # You can initiate a client by giving the client_id and client_secret params
-  # This will authorize a client and get the token
-  #
-  # @param [Hash] options the options to make the request with
-  # @param options
-  #    [Boolean] :type where where type can be 'code', 'client' for
-  #       for the oauth2 auth code flow and client credentials flow
-  #    [lambda] :store a method that persists the access_token into
-  #       a database
-  #    [lambda] :retrieve a method that is used by the sdk internally
-  #       to read the access_token and use it in all your requests
   def self.init(options = {})
     puts 'Playlyfe Initializing...............................................'
     if options[:type].nil?
@@ -44,6 +33,7 @@ class Playlyfe
     @@secret = options[:client_secret]
     @@store = options[:store]
     @@retrieve = options[:retrieve]
+    @@redirect_uri = options[:redirect_uri]
     if @@store.nil?
       @@store = lambda { |token| puts 'Storing Token' }
     end
@@ -55,30 +45,36 @@ class Playlyfe
         err.name = 'init_failed'
         err.message = 'You must pass in a redirect_uri for the auth code flow'
         raise err
-      else
-        puts 'CLIENT'
-        #RestClient.get("https://playlyfe.com/auth?redirect_uri=#{options[:redirect_uri]}&response_type=code&client_id=#{@@id}")
-        #:authorize_url =>
-        #'response_type' => 'code', 'client_id' => @@id
-        #auth_url = @@client.auth_code.authorize_url(:redirect_uri => 'http://localhost:8080/oauth2/callback')
-        #@@client.auth_code.get_token('code_value', :redirect_uri => 'http://localhost:8080/oauth2/callback') #check query.code then make post request
       end
     end
-    #RestClient.log = Logger.new(STDOUT)
   end
 
   def self.get_access_token
     puts 'Getting Access Token'
     begin
-      access_token = RestClient.post('https://playlyfe.com/auth/token',
-        {
-          :client_id => @@id,
-          :client_secret => @@secret,
-          :grant_type => 'client_credentials'
-        }.to_json,
-        :content_type => :json,
-        :accept => :json
-      )
+      if @@type == 'client'
+        access_token = RestClient.post('https://playlyfe.com/auth/token',
+          {
+            :client_id => @@id,
+            :client_secret => @@secret,
+            :grant_type => 'client_credentials'
+          }.to_json,
+          :content_type => :json,
+          :accept => :json
+        )
+      else
+        access_token = RestClient.post("https://playlyfe.com/auth/token",
+          {
+            :client_id => @@id,
+            :client_secret => @@secret,
+            :grant_type => 'authorization_code',
+            :code => @@code,
+            :redirect_uri => @@redirect_uri
+          }.to_json,
+          :content_type => :json,
+          :accept => :json
+        )
+      end
       access_token = JSON.parse(access_token)
       expires_at ||= Time.now.to_i + access_token['expires_in']
       access_token.delete('expires_in')
@@ -86,41 +82,50 @@ class Playlyfe
       @@store.call access_token
       if @@retrieve.nil?
         @@retrieve = lambda { return access_token }
+      else
+        old_token = @@retrieve.call
+        if access_token != old_token
+          @@retrieve = lambda { return access_token }
+        end
       end
     rescue => e
       raise PlaylyfeError.new(e.response)
     end
   end
 
-  def self.check_expired(access_token)
-    if access_token['expires_at'] < Time.now.to_i
-      puts 'Access Token Expired'
+  def self.exchange_code(code)
+    if code.nil?
+      err = PlaylyfeError.new("")
+      err.name = 'init_failed'
+      err.message = 'You must pass in a code in exchange_code for the auth code flow'
+      raise err
+    else
+      @@code = code
       self.get_access_token()
     end
   end
 
-  # def refresh!(params = {})
-  #   params.merge!(:client_id => @client.id,
-  #                 :client_secret => @client.secret,
-  #                 :grant_type => 'refresh_token',
-  #                 :refresh_token => refresh_token)
-  #   new_token = @client.get_token(params)
-  #   new_token.options = options
-  #   new_token.refresh_token = refresh_token unless new_token.refresh_token
-  #   new_token
-  # end
-
-  def self.login
+  def self.check_token(options)
+    puts 'Checking Token'
+    if @@retrieve.nil?
+      err = PlaylyfeError.new("")
+      err.name = 'api_request_failed'
+      err.message = 'You must pass in a code in exchange_code for the auth code flow'
+      raise err
+    end
+    access_token = @@retrieve.call
+    if access_token['expires_at'] < Time.now.to_i
+      puts 'Access Token Expired'
+      access_token = self.get_access_token()
+    end
+    options[:query][:access_token] = access_token['access_token']
   end
 
   def self.get(options = {})
     options[:route] ||= ''
     options[:query] ||= {}
     options[:raw] ||= false
-
-    access_token = @@retrieve.call
-    self.check_expired(access_token)
-    options[:query][:access_token] = access_token['access_token']
+    self.check_token(options)
 
     begin
       res = RestClient.get("#{@@api}#{options[:route]}",
@@ -140,10 +145,7 @@ class Playlyfe
     options[:route] ||= ''
     options[:query] ||= {}
     options[:body] ||= {}
-
-    access_token = @@retrieve.call
-    self.check_expired(access_token)
-    options[:query][:access_token] = access_token['access_token']
+    self.check_token(options)
 
     begin
       res = RestClient.post("#{@@api}#{options[:route]}?#{self.hash_to_query(options[:query])}",
@@ -161,10 +163,7 @@ class Playlyfe
     options[:route] ||= ''
     options[:query] ||= {}
     options[:body] ||= {}
-
-    access_token = @@retrieve.call
-    self.check_expired(access_token)
-    options[:query][:access_token] = access_token['access_token']
+    self.check_token(options)
 
     begin
       res = RestClient.patch("#{@@api}#{options[:route]}?#{self.hash_to_query(options[:query])}",
@@ -181,10 +180,7 @@ class Playlyfe
   def self.delete(options = {})
     options[:route] ||= ''
     options[:query] ||= {}
-
-    access_token = @@retrieve.call
-    self.check_expired(access_token)
-    options[:query][:access_token] = access_token['access_token']
+    self.check_token(options)
 
     begin
       res = RestClient.delete("#{@@api}#{options[:route]}",
