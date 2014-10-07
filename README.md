@@ -187,19 +187,81 @@ Playlyfe.delete(
     body: {} # The data which will specify which component you will want to delete in the route
 )
 ```
+## Get Auth Url
+```ruby
+Playlyfe.get_auth_url()
+#This will return the url to which the user needs to be redirected to so that he can login. You can use this directly in your views.
+```
+
 ## Exchange Code
 ```ruby
 Playlyfe.exchange_code(code)
-This is used in the auth code flow so that the sdk can get the access token.
-Before any request to the playlyfe api is made this has to be called atleast once. This should be called in the the route/controller which you specified in your redirect_uri
+#This is used in the auth code flow so that the sdk can get the access token.
+#Before any request to the playlyfe api is made this has to be called atleast once. This should be called in the the route/controller which you specified in your redirect_uri
 ```
 
 ## Errors
 A ```PlaylyfeError``` is thrown whenever an error occurs in each call. The error contains a name and message field which can be used to determine the type of error that occurred.
 
+Rails code demostrating using the auth code flow
+================================================
+A typical rails app would look something like this
+```ruby
+class Application < Rails::Application
+    Playlyfe.init(
+      client_id: "",
+      client_secret: "",
+      type: 'code',
+      redirect_uri: 'http://localhost:3000/welcome/index'
+    )
+end
+
+### controllers/welcome_controller.rb
+class WelcomeController < ApplicationController
+
+  def index
+    if params['code'].nil?
+      puts 'login again'
+      # here you need to add some logic if the user is logged in and
+      # you need to redirect to the playlyfe login page if needed
+    else
+      Playlyfe.exchange_code(params['code'])
+      redirect_to :action => 'home'
+    end
+  end
+
+  def home
+    @players = Playlyfe.get(route: '/players', query: { player_id: 'johny' })
+  end
+end
+
+### views/welcome/index.html.erb
+<div class="container">
+<div class="form-signin">
+Please sign in using the Playlyfe Platform
+<a href=<%= Playlyfe.get_auth_url() %>> Login </a>
+</div>
+</div>
+
+### views/welcome/home.html.erb
+<div class="container">
+<div class="form-signin">
+Please sign in using the Playlyfe Platform
+<a href=<%= Playlyfe.get_auth_url() %>> Login </a>
+</div>
+</div>
+
+### config/routes.rb
+Rails.application.routes.draw do
+  root 'welcome#index'
+  get 'welcome/index'
+  get 'welcome/home'
+end
+```
+
 License
 =======
-Playlyfe Ruby SDK v0.5.0  
+Playlyfe Ruby SDK v0.5.1  
 http://dev.playlyfe.com/  
 Copyright(c) 2013-2014, Playlyfe Technologies, developers@playlyfe.com  
 

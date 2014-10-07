@@ -93,6 +93,11 @@ class Playlyfe
     end
   end
 
+  def self.get_auth_url
+    query = { response_type: 'code', redirect_uri: @@redirect_uri, client_id: @@id }
+    "https://playlyfe.com/auth?#{self.hash_to_query(query)}"
+  end
+
   def self.exchange_code(code)
     if code.nil?
       err = PlaylyfeError.new("")
@@ -116,7 +121,8 @@ class Playlyfe
     access_token = @@retrieve.call
     if access_token['expires_at'] < Time.now.to_i
       puts 'Access Token Expired'
-      access_token = self.get_access_token()
+      self.get_access_token()
+      access_token = @@retrieve.call
     end
     options[:query][:access_token] = access_token['access_token']
   end
