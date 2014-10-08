@@ -1,6 +1,7 @@
-playlyfe-ruby-sdk [![Gem Version](https://badge.fury.io/rb/playlyfe.svg)](http://badge.fury.io/rb/playlyfe)
+Playlyfe Ruby SDK [![Gem Version](https://badge.fury.io/rb/playlyfe.svg)](http://badge.fury.io/rb/playlyfe)
 =================
 You can get the gem at [RubyGems](https://rubygems.org/gems/playlyfe)  
+It currently only supports the `client_credentials` flow and `authorization code` flow.  
 To understand how the complete api works checkout [The Playlyfe Api](http://dev.playlyfe.com/docs/api) for more information
 
 Requires
@@ -21,8 +22,7 @@ and do a bundle install
 
 Using
 -----
-### Create a client
-  There are 2 kinds of oauth flows you can use in the sdk i.e. the client credentials flow and the authorization code flow.  
+### Create a client 
   If you haven't created a client for your game yet just head over to [Playlyfe](http://playlyfe.com) and login into your account, and go to the game settings and click on client  
   **1.Client Credentials Flow**  
     In the client page click on whitelabel client  
@@ -134,7 +134,7 @@ Playlyfe.init(
     #the access token can be persisted between requests
 )
 ```
-In development the sdk caches the access token in memory so you dont need to provide the store and retrieve lambdas. But in production it is highly recommended to persist the token to a database. It is very simple and easy to do it with redis. You can see the test cases for more examples.
+In development the sdk caches the access token in memory so you don't need to provide the store and retrieve lambdas. But in production it is highly recommended to persist the token to a database. It is very simple and easy to do it with redis. You can see the test cases for more examples.
 ```ruby
     require 'redis'
     require 'playlyfe'
