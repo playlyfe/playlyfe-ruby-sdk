@@ -1,8 +1,8 @@
 Playlyfe Ruby SDK [![Gem Version](https://badge.fury.io/rb/playlyfe.svg)](http://badge.fury.io/rb/playlyfe)
-=================
-You can get the gem at [RubyGems](https://rubygems.org/gems/playlyfe)  
-It currently only supports the `client_credentials` flow and `authorization code` flow.  
-To understand how the complete api works checkout [The Playlyfe Api](http://dev.playlyfe.com/docs/api) for more information
+=================  
+This is the official OAuth 2.0 PHP client SDK for the Playlyfe API.  
+It supports the `client_credentials` and `authorization code` OAuth 2.0 flows.    
+For a complete API Reference checkout [Playlyfe Developers](https://dev.playlyfe.com/docs/api) for more information.
 
 Requires
 --------
@@ -119,90 +119,50 @@ get 'image/:filename' => 'welcome#image'
 # Use it in your views like
 <%= image_tag "/image/user", :align => "left" %//>
 ```
-Documentation
--------------------------------
-## Init
-You can initiate a client by giving the client_id and client_secret params
-```ruby
-Playlyfe.init(
-    client_id: ''
-    client_secret: ''
-    type: 'client' or 'code'
-    redirect_uri: 'The url to redirect to' #only for auth code flow
-    store: lambda { |token| } # The lambda which will persist the access token to a database. You have to persist the token to a database if you want the access token to remain the same in every request
-    retrieve: lambda { return token } # The lambda which will retrieve the access token. This is called internally by the sdk on every request so the 
-    #the access token can be persisted between requests
-)
-```
-In development the sdk caches the access token in memory so you don't need to provide the store and retrieve lambdas. But in production it is highly recommended to persist the token to a database. It is very simple and easy to do it with redis. You can see the test cases for more examples.
-```ruby
-    require 'redis'
-    require 'playlyfe'
-    require 'json'
 
-    redis = Redis.new
+# Examples
+## 1. Client Credentials Flow
+A typical rails app using client credentials code flow would look something like this
+### config/application.rb
+This is where you will initialize the sdk with your client_id and client_secret
+```ruby
+class Application < Rails::Application
     Playlyfe.init(
       client_id: "",
       client_secret: "",
-      type: 'client',
-      store: lambda { |token| redis.set('token', JSON.generate(token)) },
-      retrieve: lambda { return JSON.parse(redis.get('token')) }
+      type: 'code',
     )
+end
+```
+### controllers/welcome_controller.rb
+This is where we check if the user successfully logged in and set the authorization code using Playlyfe.exchange_code
+```ruby
+class WelcomeController < ApplicationController
+  def index
+    @players = Playlyfe.get(route: '/players', query: { player_id: 'johny' })
+  end
+end
+```
+### views/welcome/index.html.erb
+This will display the index page and list all the players in the game
+```ruby
+<div class="container">
+<div class="panel panel-default">
+<% @players["data"].each do |player| %>
+    <li class="list-group-item">
+      <p>
+        <%= player["id"] %>
+        <%= player["alias"] %>
+      </p>
+    </li>
+<% end %>
+</div>
+</div>
 ```
 
-
-## Get
-```ruby
-Playlyfe.get(
-    route: '' # The api route to get data from
-    query: {} # The query params that you want to send to the route
-    raw: false # Whether you want the response to be in raw string form or json
-)
-```
-## Post
-```ruby
-Playlyfe.post(
-    route: '' # The api route to post data to
-    query: {} # The query params that you want to send to the route
-    body: {} # The data you want to post to the api this will be automagically converted to json
-)
-```
-## Patch
-```ruby
-Playlyfe.patch(
-    route: '' # The api route to patch data
-    query: {} # The query params that you want to send to the route
-    body: {} # The data you want to update in the api this will be automagically converted to json
-)
-```
-## Delete
-```ruby
-Playlyfe.delete(
-    route: '' # The api route to delete the component
-    query: {} # The query params that you want to send to the route
-    body: {} # The data which will specify which component you will want to delete in the route
-)
-```
-## Get Login Url
-```ruby
-Playlyfe.get_login_url()
-#This will return the url to which the user needs to be redirected for the user to login. You can use this directly in your views.
-```
-
-## Exchange Code
-```ruby
-Playlyfe.exchange_code(code)
-#This is used in the auth code flow so that the sdk can get the access token.
-#Before any request to the playlyfe api is made this has to be called atleast once. 
-#This should be called in the the route/controller which you specified in your redirect_uri
-```
-
-## Errors
-A ```PlaylyfeError``` is thrown whenever an error occurs in each call. The error contains a name and message field which can be used to determine the type of error that occurred.
-
-Rails code demostrating using the authorization code flow
----------------------------------------------------------
-A typical rails app would look something like this
+## 2. Authorization Code Flow
+A typical rails app using authorization code flow would look something like this
+### config/application.rb
 This is where you will initialize the sdk with your client_id and client_secret
 ```ruby
 class Application < Rails::Application
@@ -271,6 +231,93 @@ Rails.application.routes.draw do
   get 'welcome/home'
 end
 ```
+
+# Documentation
+## Init
+You can initiate a client by giving the client_id and client_secret params
+```ruby
+Playlyfe.init(
+    client_id: ''
+    client_secret: ''
+    type: 'client' or 'code'
+    redirect_uri: 'The url to redirect to' #only for auth code flow
+    store: lambda { |token| } # The lambda which will persist the access token to a database. You have to persist the token to a database if you want the access token to remain the same in every request
+    retrieve: lambda { return token } # The lambda which will retrieve the access token. This is called internally by the sdk on every request so the 
+    #the access token can be persisted between requests
+)
+```
+In development the sdk caches the access token in memory so you don't need to provide the store and retrieve lambdas. But in production it is highly recommended to persist the token to a database. It is very simple and easy to do it with redis. You can see the test cases for more examples.
+```ruby
+    require 'redis'
+    require 'playlyfe'
+    require 'json'
+
+    redis = Redis.new
+    Playlyfe.init(
+      client_id: "",
+      client_secret: "",
+      type: 'client',
+      store: lambda { |token| redis.set('token', JSON.generate(token)) },
+      retrieve: lambda { return JSON.parse(redis.get('token')) }
+    )
+```
+
+
+## Get
+```ruby
+Playlyfe.get(
+    route: '' # The api route to get data from
+    query: {} # The query params that you want to send to the route
+    raw: false # Whether you want the response to be in raw string form or json
+)
+```
+## Post
+```ruby
+Playlyfe.post(
+    route: '' # The api route to post data to
+    query: {} # The query params that you want to send to the route
+    body: {} # The data you want to post to the api this will be automagically converted to json
+)
+```
+## Patch
+```ruby
+Playlyfe.patch(
+    route: '' # The api route to patch data
+    query: {} # The query params that you want to send to the route
+    body: {} # The data you want to update in the api this will be automagically converted to json
+)
+```
+## Put
+```ruby
+Playlyfe.put(
+    route: '' # The api route to put data
+    query: {} # The query params that you want to send to the route
+    body: {} # The data you want to update in the api this will be automagically converted to json
+)
+```
+## Delete
+```ruby
+Playlyfe.delete(
+    route: '' # The api route to delete the component
+    query: {} # The query params that you want to send to the route
+)
+```
+## Get Login Url
+```ruby
+Playlyfe.get_login_url()
+#This will return the url to which the user needs to be redirected for the user to login. You can use this directly in your views.
+```
+
+## Exchange Code
+```ruby
+Playlyfe.exchange_code(code)
+#This is used in the auth code flow so that the sdk can get the access token.
+#Before any request to the playlyfe api is made this has to be called atleast once. 
+#This should be called in the the route/controller which you specified in your redirect_uri
+```
+
+## Errors
+A ```PlaylyfeError``` is thrown whenever an error occurs in each call.The Error contains a name and message field which can be used to determine the type of error that occurred.
 
 License
 =======
