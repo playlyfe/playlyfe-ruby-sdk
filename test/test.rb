@@ -88,6 +88,12 @@ class PlaylyfeTest < Test::Unit::TestCase
 
     deleted_process = Playlyfe.delete(route: "/processes/#{new_process['id']}", query: { player_id: player_id })
     assert_not_nil deleted_process['message']
+
+    #data = Playlyfe.put(route: "/players/#{player_id}/reset", query: { player_id: player_id })
+    #puts data
+
+    raw_data = Playlyfe.get(route: '/player', query: { player_id: player_id }, raw: true)
+    assert_equal raw_data.class, String
   end
 
   def test_init_production

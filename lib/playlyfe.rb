@@ -111,13 +111,6 @@ class Playlyfe
   end
 
   def self.check_token(options)
-    puts 'Checking Token'
-    if @@retrieve.nil?
-      err = PlaylyfeError.new("")
-      err.name = 'api_request_failed'
-      err.message = 'You must pass in a code in exchange_code for the auth code flow'
-      raise err
-    end
     access_token = @@retrieve.call
     if access_token['expires_at'] < Time.now.to_i
       puts 'Access Token Expired'
@@ -155,6 +148,24 @@ class Playlyfe
 
     begin
       res = RestClient.post("#{@@api}#{options[:route]}?#{self.hash_to_query(options[:query])}",
+        options[:body].to_json,
+        :content_type => :json,
+        :accept => :json
+      )
+      return JSON.parse(res.body)
+    rescue => e
+      raise PlaylyfeError.new(e.response)
+    end
+  end
+
+  def self.put(options = {})
+    options[:route] ||= ''
+    options[:query] ||= {}
+    options[:body] ||= {}
+    self.check_token(options)
+
+    begin
+      res = RestClient.put("#{@@api}#{options[:route]}?#{self.hash_to_query(options[:query])}",
         options[:body].to_json,
         :content_type => :json,
         :accept => :json
