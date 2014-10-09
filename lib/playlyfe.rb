@@ -32,7 +32,7 @@ class Playlyfe
     @@id = options[:client_id]
     @@secret = options[:client_secret]
     @@store = options[:store]
-    @@retrieve = options[:retrieve]
+    @@load = options[:load]
     @@redirect_uri = options[:redirect_uri]
     if @@store.nil?
       @@store = lambda { |token| puts 'Storing Token' }
@@ -80,12 +80,12 @@ class Playlyfe
       access_token.delete('expires_in')
       access_token['expires_at'] = expires_at
       @@store.call access_token
-      if @@retrieve.nil?
-        @@retrieve = lambda { return access_token }
+      if @@load.nil?
+        @@load = lambda { return access_token }
       else
-        old_token = @@retrieve.call
+        old_token = @@load.call
         if access_token != old_token
-          @@retrieve = lambda { return access_token }
+          @@load = lambda { return access_token }
         end
       end
     rescue => e
@@ -96,6 +96,10 @@ class Playlyfe
   def self.get_login_url
     query = { response_type: 'code', redirect_uri: @@redirect_uri, client_id: @@id }
     "https://playlyfe.com/auth?#{self.hash_to_query(query)}"
+  end
+
+  def self.get_logout_url
+    ""
   end
 
   def self.exchange_code(code)
@@ -111,13 +115,28 @@ class Playlyfe
   end
 
   def self.check_token(options)
-    access_token = @@retrieve.call
+    access_token = @@load.call
     if access_token['expires_at'] < Time.now.to_i
       puts 'Access Token Expired'
       self.get_access_token()
-      access_token = @@retrieve.call
+      access_token = @@load.call
     end
     options[:query][:access_token] = access_token['access_token']
+  end
+
+  def self.api(options = {})
+    case options[:method]
+      when 'GET'
+        self.get(options)
+      when 'POST'
+        self.post(options)
+      when 'PUT'
+        self.put(options)
+      when 'PATCH'
+        self.patch(options)
+      when 'DELETE'
+        self.patch(options)
+    end
   end
 
   def self.get(options = {})

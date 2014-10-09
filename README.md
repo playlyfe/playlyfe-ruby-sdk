@@ -242,11 +242,11 @@ Playlyfe.init(
     type: 'client' or 'code'
     redirect_uri: 'The url to redirect to' #only for auth code flow
     store: lambda { |token| } # The lambda which will persist the access token to a database. You have to persist the token to a database if you want the access token to remain the same in every request
-    retrieve: lambda { return token } # The lambda which will retrieve the access token. This is called internally by the sdk on every request so the 
+    load: lambda { return token } # The lambda which will load the access token. This is called internally by the sdk on every request so the 
     #the access token can be persisted between requests
 )
 ```
-In development the sdk caches the access token in memory so you don't need to provide the store and retrieve lambdas. But in production it is highly recommended to persist the token to a database. It is very simple and easy to do it with redis. You can see the test cases for more examples.
+In development the sdk caches the access token in memory so you don't need to provide the store and load lambdas. But in production it is highly recommended to persist the token to a database. It is very simple and easy to do it with redis. You can see the test cases for more examples.
 ```ruby
     require 'redis'
     require 'playlyfe'
@@ -258,10 +258,19 @@ In development the sdk caches the access token in memory so you don't need to pr
       client_secret: "",
       type: 'client',
       store: lambda { |token| redis.set('token', JSON.generate(token)) },
-      retrieve: lambda { return JSON.parse(redis.get('token')) }
+      load: lambda { return JSON.parse(redis.get('token')) }
     )
 ```
 
+## API
+```ruby
+Playlyfe.api(
+    method: 'GET' # The request method can be GET/POST/PUT/PATCH/DELETE
+    route: '' # The api route to get data from
+    query: {} # The query params that you want to send to the route
+    raw: false # Whether you want the response to be in raw string form or json
+)
+```
 
 ## Get
 ```ruby
@@ -321,7 +330,7 @@ A ```PlaylyfeError``` is thrown whenever an error occurs in each call.The Error 
 
 License
 =======
-Playlyfe Ruby SDK v0.5.5  
+Playlyfe Ruby SDK v0.5.6  
 http://dev.playlyfe.com/  
 Copyright(c) 2013-2014, Playlyfe Technologies, developers@playlyfe.com  
 

@@ -48,6 +48,10 @@ class PlaylyfeTest < Test::Unit::TestCase
       client_secret: "YzllYTE5NDQtNDMwMC00YTdkLWFiM2MtNTg0Y2ZkOThjYTZkMGIyNWVlNDAtNGJiMC0xMWU0LWI2NGEtYjlmMmFkYTdjOTI3",
       type: 'client'
     )
+    players = Playlyfe.api(method: 'GET', route: '/players', query: { player_id: 'student1', limit: 1 })
+    assert_not_nil players["data"]
+    assert_not_nil players["data"][0]
+
     players = Playlyfe.get(route: '/players', query: { player_id: 'student1', limit: 1 })
     assert_not_nil players["data"]
     assert_not_nil players["data"][0]
@@ -113,7 +117,7 @@ class PlaylyfeTest < Test::Unit::TestCase
       client_secret: "YzllYTE5NDQtNDMwMC00YTdkLWFiM2MtNTg0Y2ZkOThjYTZkMGIyNWVlNDAtNGJiMC0xMWU0LWI2NGEtYjlmMmFkYTdjOTI3",
       type: 'client',
       store: lambda { |token| redis.set('token', JSON.generate(token)) },
-      retrieve: lambda { return JSON.parse(redis.get('token')) }
+      load: lambda { return JSON.parse(redis.get('token')) }
     )
     players = Playlyfe.get(route: '/players', query: { player_id: 'student1', limit: 1 })
     assert_not_nil players["data"]
