@@ -1,6 +1,7 @@
 Gem::Specification.new do |s|
   s.name = "playlyfe"
-  s.version     = '0.5.3'
+  s.version     = '0.5.5'
+  s.required_ruby_version = '>= 1.9.3'
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.rubygems_version = %q{1.6.2}
   s.summary     = "The Playlyfe Ruby SDK"

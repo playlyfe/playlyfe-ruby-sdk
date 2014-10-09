@@ -26,11 +26,11 @@ Using
   If you haven't created a client for your game yet just head over to [Playlyfe](http://playlyfe.com) and login into your account, and go to the game settings and click on client  
   **1.Client Credentials Flow**  
     In the client page click on whitelabel client  
-    ![alt text](https://github.com/pyros2097/playlyfe-ruby-sdk/raw/master/images/client.png "")
+    ![alt text](https://github.com/playlyfe/playlyfe-ruby-sdk/raw/master/images/client.png "")
 
   **2.Authorization Code Flow**  
     In the client page click on backend client and specify the redirect uri this will be the url where you will be redirected to get the token
-    ![alt text](https://github.com/pyros2097/playlyfe-ruby-sdk/raw/master/images/auth.png "")
+    ![alt text](https://github.com/playlyfe/playlyfe-ruby-sdk/raw/master/images/auth.png "")
 
 > Note: If you want to test the sdk in staging you can click the Test Client button. You need to pass the player_id in the query in every request also.
 
@@ -135,7 +135,7 @@ class Application < Rails::Application
 end
 ```
 ### controllers/welcome_controller.rb
-This is where we check if the user successfully logged in and set the authorization code using Playlyfe.exchange_code
+This is where we make an api request to the Playlyfe Platform the fetch all the players and display them
 ```ruby
 class WelcomeController < ApplicationController
   def index
@@ -321,7 +321,7 @@ A ```PlaylyfeError``` is thrown whenever an error occurs in each call.The Error 
 
 License
 =======
-Playlyfe Ruby SDK v0.5.2  
+Playlyfe Ruby SDK v0.5.5  
 http://dev.playlyfe.com/  
 Copyright(c) 2013-2014, Playlyfe Technologies, developers@playlyfe.com  
 
