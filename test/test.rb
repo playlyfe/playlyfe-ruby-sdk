@@ -57,7 +57,7 @@ class PlaylyfeTest < Test::Unit::TestCase
     assert_not_nil players["data"][0]
 
     begin
-      assert_nil Playlyfe.get(route: '/player')
+      Playlyfe.get(route: '/player')
     rescue PlaylyfeError => e
       assert_equal e.message, "The 'player_id' parameter should be specified in the query"
     end
