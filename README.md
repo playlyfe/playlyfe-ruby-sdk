@@ -1,7 +1,9 @@
+![Playlyfe Ruby SDK](./images/pl-ruby-sdk.png "Playlyfe Ruby SDK")
+
 Playlyfe Ruby SDK [![Gem Version](https://badge.fury.io/rb/playlyfe.svg)](http://badge.fury.io/rb/playlyfe)
-=================  
-This is the official OAuth 2.0 PHP client SDK for the Playlyfe API.  
-It supports the `client_credentials` and `authorization code` OAuth 2.0 flows.    
+=================
+This is the official OAuth 2.0 PHP client SDK for the Playlyfe API.
+It supports the `client_credentials` and `authorization code` OAuth 2.0 flows.
 For a complete API Reference checkout [Playlyfe Developers](https://dev.playlyfe.com/docs/api) for more information.
 
 Requires
@@ -13,7 +15,7 @@ Install
 ```ruby
 gem install playlyfe
 ```
-or if you are using rails  
+or if you are using rails
 Just add it to your Gemfile
 ```ruby
 gem 'playlyfe'
@@ -22,15 +24,15 @@ and do a bundle install
 
 Using
 -----
-### Create a client 
-  If you haven't created a client for your game yet just head over to [Playlyfe](http://playlyfe.com) and login into your account, and go to the game settings and click on client  
-  **1.Client Credentials Flow**  
-    In the client page click on whitelabel client  
-    ![alt text](https://github.com/playlyfe/playlyfe-ruby-sdk/raw/master/images/client.png "")
+### Create a client
+  If you haven't created a client for your game yet just head over to [Playlyfe](http://playlyfe.com) and login into your account, and go to the game settings and click on client
+  **1.Client Credentials Flow**
+    In the client page click on whitelabel client
+    ![Creating a Whitelabel Client](./images/client.png "Creating a Whitelabel Client")
 
-  **2.Authorization Code Flow**  
+  **2.Authorization Code Flow**
     In the client page click on backend client and specify the redirect uri this will be the url where you will be redirected to get the token
-    ![alt text](https://github.com/playlyfe/playlyfe-ruby-sdk/raw/master/images/auth.png "")
+    ![Creating a Backend Client](./images/auth.png "Creating a Backend Client")
 
 > Note: If you want to test the sdk in staging you can click the Test Client button. You need to pass the player_id in the query in every request also.
 
@@ -222,7 +224,7 @@ This will display the home page after a user logs in. Here it displays all the p
 </div>
 ```
 ### config/routes.rb
-There are 2 routes here  
+There are 2 routes here
 The index route is for the login and the home route is for the user after logging in
 ```ruby
 Rails.application.routes.draw do
@@ -242,7 +244,7 @@ Playlyfe.init(
     type: 'client' or 'code'
     redirect_uri: 'The url to redirect to' #only for auth code flow
     store: lambda { |token| } # The lambda which will persist the access token to a database. You have to persist the token to a database if you want the access token to remain the same in every request
-    load: lambda { return token } # The lambda which will load the access token. This is called internally by the sdk on every request so the 
+    load: lambda { return token } # The lambda which will load the access token. This is called internally by the sdk on every request so the
     #the access token can be persisted between requests
 )
 ```
@@ -321,7 +323,7 @@ Playlyfe.get_login_url()
 ```ruby
 Playlyfe.exchange_code(code)
 #This is used in the auth code flow so that the sdk can get the access token.
-#Before any request to the playlyfe api is made this has to be called atleast once. 
+#Before any request to the playlyfe api is made this has to be called atleast once.
 #This should be called in the the route/controller which you specified in your redirect_uri
 ```
 
@@ -330,19 +332,19 @@ A ```PlaylyfeError``` is thrown whenever an error occurs in each call.The Error 
 
 License
 =======
-Playlyfe Ruby SDK v0.5.6  
-http://dev.playlyfe.com/  
-Copyright(c) 2013-2014, Playlyfe IT Solutions Pvt. Ltd, support@playlyfe.com  
+Playlyfe Ruby SDK v0.5.6
+http://dev.playlyfe.com/
+Copyright(c) 2013-2014, Playlyfe IT Solutions Pvt. Ltd, support@playlyfe.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:  
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.  
+all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
