@@ -20,8 +20,7 @@ end
 class Playlyfe
   @@api = 'https://api.playlyfe.com/v1'
 
-  def self.init(options = {})
-    puts 'Playlyfe Initializing...............................................'
+  def initialize(options = {})
     if options[:type].nil?
       err = PlaylyfeError.new("")
       err.name = 'init_failed'
@@ -38,7 +37,7 @@ class Playlyfe
       @@store = lambda { |token| puts 'Storing Token' }
     end
     if @@type == 'client'
-      self.get_access_token()
+      get_access_token()
     else
       if options[:redirect_uri].nil?
         err = PlaylyfeError.new("")
@@ -49,8 +48,7 @@ class Playlyfe
     end
   end
 
-  def self.get_access_token
-    puts 'Getting Access Token'
+  def get_access_token
     begin
       if @@type == 'client'
         access_token = RestClient.post('https://playlyfe.com/auth/token',
@@ -93,62 +91,51 @@ class Playlyfe
     end
   end
 
-  def self.get_login_url
-    query = { response_type: 'code', redirect_uri: @@redirect_uri, client_id: @@id }
-    "https://playlyfe.com/auth?#{self.hash_to_query(query)}"
-  end
-
-  def self.get_logout_url
-    ""
-  end
-
-  def self.exchange_code(code)
-    if code.nil?
-      err = PlaylyfeError.new("")
-      err.name = 'init_failed'
-      err.message = 'You must pass in a code in exchange_code for the auth code flow'
-      raise err
-    else
-      @@code = code
-      self.get_access_token()
-    end
-  end
-
-  def self.check_token(options)
+  def check_token(options)
     access_token = @@load.call
     if access_token['expires_at'] < Time.now.to_i
       puts 'Access Token Expired'
-      self.get_access_token()
+      get_access_token()
       access_token = @@load.call
     end
     options[:query][:access_token] = access_token['access_token']
   end
 
-  def self.api(options = {})
-    case options[:method]
-      when 'GET'
-        self.get(options)
-      when 'POST'
-        self.post(options)
-      when 'PUT'
-        self.put(options)
-      when 'PATCH'
-        self.patch(options)
-      when 'DELETE'
-        self.patch(options)
-    end
-  end
-
-  def self.get(options = {})
+  def api(options = {})
     options[:route] ||= ''
     options[:query] ||= {}
+    options[:body] ||= {}
     options[:raw] ||= false
-    self.check_token(options)
-
+    check_token(options)
     begin
-      res = RestClient.get("#{@@api}#{options[:route]}",
-        {:params => options[:query] }
-      )
+      case options[:method]
+        when 'GET'
+          res = RestClient.get("#{@@api}#{options[:route]}",
+            {:params => options[:query] }
+          )
+        when 'POST'
+          res = RestClient.post("#{@@api}#{options[:route]}?#{hash_to_query(options[:query])}",
+            options[:body].to_json,
+            :content_type => :json,
+            :accept => :json
+          )
+        when 'PUT'
+          res = RestClient.put("#{@@api}#{options[:route]}?#{hash_to_query(options[:query])}",
+            options[:body].to_json,
+            :content_type => :json,
+            :accept => :json
+          )
+        when 'PATCH'
+          res = RestClient.patch("#{@@api}#{options[:route]}?#{hash_to_query(options[:query])}",
+            options[:body].to_json,
+            :content_type => :json,
+            :accept => :json
+          )
+        when 'DELETE'
+          res = RestClient.delete("#{@@api}#{options[:route]}",
+            {:params => options[:query] }
+          )
+      end
       if options[:raw] == true
         return res.body
       else
@@ -159,76 +146,53 @@ class Playlyfe
     end
   end
 
-  def self.post(options = {})
-    options[:route] ||= ''
-    options[:query] ||= {}
-    options[:body] ||= {}
-    self.check_token(options)
-
-    begin
-      res = RestClient.post("#{@@api}#{options[:route]}?#{self.hash_to_query(options[:query])}",
-        options[:body].to_json,
-        :content_type => :json,
-        :accept => :json
-      )
-      return JSON.parse(res.body)
-    rescue => e
-      raise PlaylyfeError.new(e.response)
-    end
+  def get(options = {})
+    options[:method] = "GET"
+    api(options)
   end
 
-  def self.put(options = {})
-    options[:route] ||= ''
-    options[:query] ||= {}
-    options[:body] ||= {}
-    self.check_token(options)
-
-    begin
-      res = RestClient.put("#{@@api}#{options[:route]}?#{self.hash_to_query(options[:query])}",
-        options[:body].to_json,
-        :content_type => :json,
-        :accept => :json
-      )
-      return JSON.parse(res.body)
-    rescue => e
-      raise PlaylyfeError.new(e.response)
-    end
+  def post(options = {})
+    options[:method] = "POST"
+    api(options)
   end
 
-  def self.patch(options = {})
-    options[:route] ||= ''
-    options[:query] ||= {}
-    options[:body] ||= {}
-    self.check_token(options)
-
-    begin
-      res = RestClient.patch("#{@@api}#{options[:route]}?#{self.hash_to_query(options[:query])}",
-        options[:body].to_json,
-        :content_type => :json,
-        :accept => :json
-      )
-      return JSON.parse(res.body)
-    rescue => e
-      raise PlaylyfeError.new(e.response)
-    end
+  def put(options = {})
+    options[:method] = "PUT"
+    api(options)
   end
 
-  def self.delete(options = {})
-    options[:route] ||= ''
-    options[:query] ||= {}
-    self.check_token(options)
-
-    begin
-      res = RestClient.delete("#{@@api}#{options[:route]}",
-        {:params => options[:query] }
-      )
-      JSON.parse(res.body)
-    rescue => e
-      raise PlaylyfeError.new(e.response)
-    end
+  def patch(options = {})
+    options[:method] = "PATCH"
+    api(options)
   end
 
-  def self.hash_to_query(hash)
+  def delete(options = {})
+    options[:method] = "DELETE"
+    api(options)
+  end
+
+  def hash_to_query(hash)
     return URI.encode(hash.map{|k,v| "#{k}=#{v}"}.join("&"))
+  end
+
+  def get_login_url
+    query = { response_type: 'code', redirect_uri: @@redirect_uri, client_id: @@id }
+    "https://playlyfe.com/auth?#{hash_to_query(query)}"
+  end
+
+  def get_logout_url
+    ""
+  end
+
+  def exchange_code(code)
+    if code.nil?
+      err = PlaylyfeError.new("")
+      err.name = 'init_failed'
+      err.message = 'You must pass in a code in exchange_code for the auth code flow'
+      raise err
+    else
+      @@code = code
+      get_access_token()
+    end
   end
 end

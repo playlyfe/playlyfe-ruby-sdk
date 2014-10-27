@@ -6,7 +6,7 @@ class PlaylyfeTest < Test::Unit::TestCase
 
   def test_invalid_client
     begin
-      Playlyfe.init(
+      Playlyfe.new(
         client_id: "wrong_id",
         client_secret: "wrong_secret",
         type: 'client'
@@ -19,7 +19,7 @@ class PlaylyfeTest < Test::Unit::TestCase
 
   def test_wrong_init
     begin
-      Playlyfe.init(
+      Playlyfe.new(
         client_id: "Zjc0MWU0N2MtODkzNS00ZWNmLWEwNmYtY2M1MGMxNGQ1YmQ4",
         client_secret: "YzllYTE5NDQtNDMwMC00YTdkLWFiM2MtNTg0Y2ZkOThjYTZkMGIyNWVlNDAtNGJiMC0xMWU0LWI2NGEtYjlmMmFkYTdjOTI3"
       )
@@ -28,60 +28,54 @@ class PlaylyfeTest < Test::Unit::TestCase
     end
   end
 
-  def test_wrong_api
-    begin
-      Playlyfe.init(
-        client_id: "Zjc0MWU0N2MtODkzNS00ZWNmLWEwNmYtY2M1MGMxNGQ1YmQ4",
-        client_secret: "YzllYTE5NDQtNDMwMC00YTdkLWFiM2MtNTg0Y2ZkOThjYTZkMGIyNWVlNDAtNGJiMC0xMWU0LWI2NGEtYjlmMmFkYTdjOTI3",
-        type: 'client'
-      )
-      Playlyfe.get(route: '/gege', query: { player_id: 'student1' })
-    rescue PlaylyfeError => e
-      assert_equal e.name,'route_not_found'
-      assert_equal e.message, 'This route does not exist'
-    end
-  end
-
   def test_init_staging
-    Playlyfe.init(
+    pl = Playlyfe.new(
       client_id: "Zjc0MWU0N2MtODkzNS00ZWNmLWEwNmYtY2M1MGMxNGQ1YmQ4",
       client_secret: "YzllYTE5NDQtNDMwMC00YTdkLWFiM2MtNTg0Y2ZkOThjYTZkMGIyNWVlNDAtNGJiMC0xMWU0LWI2NGEtYjlmMmFkYTdjOTI3",
       type: 'client'
     )
-    players = Playlyfe.api(method: 'GET', route: '/players', query: { player_id: 'student1', limit: 1 })
+
+    begin
+      pl.get(route: '/gege', query: { player_id: 'student1' })
+    rescue PlaylyfeError => e
+      assert_equal e.name,'route_not_found'
+      assert_equal e.message, 'This route does not exist'
+    end
+
+    players = pl.api(method: 'GET', route: '/players', query: { player_id: 'student1', limit: 1 })
     assert_not_nil players["data"]
     assert_not_nil players["data"][0]
 
-    players = Playlyfe.get(route: '/players', query: { player_id: 'student1', limit: 1 })
+    players = pl.get(route: '/players', query: { player_id: 'student1', limit: 1 })
     assert_not_nil players["data"]
     assert_not_nil players["data"][0]
 
     begin
-      Playlyfe.get(route: '/player')
+      pl.get(route: '/player')
     rescue PlaylyfeError => e
       assert_equal e.message, "The 'player_id' parameter should be specified in the query"
     end
 
     player_id = 'student1'
-    player = Playlyfe.get(route: '/player', query: { player_id: player_id } )
+    player = pl.get(route: '/player', query: { player_id: player_id } )
     assert_equal player["id"], "student1"
     assert_equal player["alias"], "Student1"
     assert_equal player["enabled"], true
 
-    Playlyfe.get(route: '/definitions/processes', query: { player_id: player_id } )
-    Playlyfe.get(route:'/definitions/teams', query: { player_id: player_id } )
-    Playlyfe.get(route: '/processes', query: { player_id: player_id } )
-    Playlyfe.get(route: '/teams', query: { player_id: player_id } )
+    pl.get(route: '/definitions/processes', query: { player_id: player_id } )
+    pl.get(route:'/definitions/teams', query: { player_id: player_id } )
+    pl.get(route: '/processes', query: { player_id: player_id } )
+    pl.get(route: '/teams', query: { player_id: player_id } )
 
-    processes = Playlyfe.get(route: '/processes', query: { player_id: 'student1', limit: 1, skip: 4 })
+    processes = pl.get(route: '/processes', query: { player_id: 'student1', limit: 1, skip: 4 })
     assert_equal processes["data"][0]["definition"], "module1"
     assert_equal processes["data"].size, 1
 
-    new_process = Playlyfe.post(route: '/definitions/processes/module1', query: { player_id: player_id })
+    new_process = pl.post(route: '/definitions/processes/module1', query: { player_id: player_id })
     assert_equal new_process["definition"], "module1"
     assert_equal new_process["state"], "ACTIVE"
 
-    patched_process = Playlyfe.patch(
+    patched_process = pl.patch(
       route: "/processes/#{new_process['id']}",
       query: { player_id: player_id },
       body: { name: 'patched_process', access: 'PUBLIC' }
@@ -90,43 +84,42 @@ class PlaylyfeTest < Test::Unit::TestCase
     assert_equal patched_process['name'], 'patched_process'
     assert_equal patched_process['access'], 'PUBLIC'
 
-    deleted_process = Playlyfe.delete(route: "/processes/#{new_process['id']}", query: { player_id: player_id })
+    deleted_process = pl.delete(route: "/processes/#{new_process['id']}", query: { player_id: player_id })
     assert_not_nil deleted_process['message']
 
-    #data = Playlyfe.put(route: "/players/#{player_id}/reset", query: { player_id: player_id })
+    #data = pl.put(route: "/players/#{player_id}/reset", query: { player_id: player_id })
     #puts data
 
-    raw_data = Playlyfe.get(route: '/player', query: { player_id: player_id }, raw: true)
+    raw_data = pl.get(route: '/player', query: { player_id: player_id }, raw: true)
     assert_equal raw_data.class, String
   end
 
   def test_init_production
-    Playlyfe.init(
+    pl = Playlyfe.new(
       client_id: "N2Y4NjNlYTItODQzZi00YTQ0LTkzZWEtYTBiNTA2ODg3MDU4",
       client_secret: "NDc3NTA0NmItMjBkZi00MjI2LWFhMjUtOTI0N2I1YTkxYjc2M2U3ZGI0MDAtNGQ1Mi0xMWU0LWJmZmUtMzkyZTdiOTYxYmMx",
       type: 'client'
     )
-    #player = Playlyfe.get(route: '/players', query: { player_id: 'l54328754bddc332e0021a847', limit: 1 })
-    #assert_equal player["data"][0]["email"], "peter@playlyfe.com"
+    players = pl.get(route: '/game/players', query: { limit: 1 })
   end
 
   def test_store
     redis = Redis.new
-    Playlyfe.init(
+    pl = Playlyfe.new(
       client_id: "Zjc0MWU0N2MtODkzNS00ZWNmLWEwNmYtY2M1MGMxNGQ1YmQ4",
       client_secret: "YzllYTE5NDQtNDMwMC00YTdkLWFiM2MtNTg0Y2ZkOThjYTZkMGIyNWVlNDAtNGJiMC0xMWU0LWI2NGEtYjlmMmFkYTdjOTI3",
       type: 'client',
       store: lambda { |token| redis.set('token', JSON.generate(token)) },
       load: lambda { return JSON.parse(redis.get('token')) }
     )
-    players = Playlyfe.get(route: '/players', query: { player_id: 'student1', limit: 1 })
+    players = pl.get(route: '/players', query: { player_id: 'student1', limit: 1 })
     assert_not_nil players["data"]
     assert_not_nil players["data"][0]
   end
 
   def test_auth_code_error
     begin
-      Playlyfe.init(
+      Playlyfe.new(
         client_id: "NGM2ZmYyNGQtNjViMy00YjQ0LWI0YTgtZTdmYWFlNDRkMmUx",
         client_secret: "ZTQ0OWI4YTItYzE4ZC00MWQ5LTg3YjktMDI5ZjAxYTBkZmRiZGQ0NzI4OTAtNGQ1My0xMWU0LWJmZmUtMzkyZTdiOTYxYmMx",
         type: 'code'
@@ -137,7 +130,7 @@ class PlaylyfeTest < Test::Unit::TestCase
   end
 
   def test_auth_code
-    Playlyfe.init(
+    Playlyfe.new(
       client_id: "NGM2ZmYyNGQtNjViMy00YjQ0LWI0YTgtZTdmYWFlNDRkMmUx",
       client_secret: "ZTQ0OWI4YTItYzE4ZC00MWQ5LTg3YjktMDI5ZjAxYTBkZmRiZGQ0NzI4OTAtNGQ1My0xMWU0LWJmZmUtMzkyZTdiOTYxYmMx",
       type: 'code',
