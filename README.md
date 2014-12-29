@@ -6,7 +6,7 @@ This is the official OAuth 2.0 PHP client SDK for the Playlyfe API.
 It supports the `client_credentials` and `authorization code` OAuth 2.0 flows.
 For a complete API Reference checkout [Playlyfe Developers](https://dev.playlyfe.com/docs/api) for more information.
 
-> Note: Breaking Changes this is the new version of the sdk which uses the Playlyfe api v2 (version 2) by default if you still want to use the v1 api you can do that so by passing a version key in the options when creating a client with 'v1' as the value
+> Note: Breaking Changes this is the new version of the sdk which uses the Playlyfe api v2 by default if you still want to use the v1 api you can do that so by passing a version key in the options when creating a client with 'v1' as the value
 
 ex: 
 ```ruby
@@ -54,7 +54,6 @@ Using
 The Playlyfe class allows you to make rest api calls like GET, POST, .. etc
 **For v1 routes**
 ```ruby
-
 playlyfe = Playlyfe.new(
   version: 'v1'
   client_id: 'Your Playlyfe game client id',
@@ -91,7 +90,6 @@ playlyfe.post(
 ```
 **For v2 routes**
 ```ruby
-
 playlyfe = Playlyfe.new(
   client_id: 'Your Playlyfe game client id',
   client_secret: 'Your Playlyfe game client secret',
@@ -115,7 +113,7 @@ puts processes
 process =  playlyfe.post(
   route: "/runtime/processes",
   query: { player_id: 'johny' },
-  body: { name: "My First Process" }
+  body: { definition: 'collect', name: "My First Process" }
 )
 
 #To play a process
@@ -274,6 +272,7 @@ get 'image/:filename' => 'welcome#image'
 You can initiate a client by giving the client_id and client_secret params
 ```ruby
 Playlyfe.new(
+    version: 'v2' # by default it uses Playlyfe v2 api
     client_id: 'Your client id'
     client_secret: 'Your client secret'
     type: 'client' or 'code'
