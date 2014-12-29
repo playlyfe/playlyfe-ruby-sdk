@@ -6,6 +6,15 @@ This is the official OAuth 2.0 PHP client SDK for the Playlyfe API.
 It supports the `client_credentials` and `authorization code` OAuth 2.0 flows.
 For a complete API Reference checkout [Playlyfe Developers](https://dev.playlyfe.com/docs/api) for more information.
 
+> Note: Breaking Changes this is the new version of the sdk which uses the Playlyfe api v2 (version 2) by default if you still want to use the v1 api you can do that so by passing a version key in the options when creating a client with 'v1' as the value
+ex: 
+    playlyfe = Playlyfe.new(
+      version: 'v1'
+      client_id: 'Your Playlyfe game client id',
+      client_secret: 'Your Playlyfe game client secret',
+      type: 'client'
+    )
+
 Requires
 --------
 Ruby >= 1.9.3
@@ -40,7 +49,15 @@ Using
 
 # Examples
 The Playlyfe class allows you to make rest api calls like GET, POST, .. etc
+**For v1 routes**
 ```ruby
+
+playlyfe = Playlyfe.new(
+  version: 'v1'
+  client_id: 'Your Playlyfe game client id',
+  client_secret: 'Your Playlyfe game client secret',
+  type: 'client'
+)
 # To get infomation of the player johny
 player = playlyfe.get(
   route: '/player',
@@ -69,6 +86,43 @@ playlyfe.post(
   body: { trigger: "#{@trigger}" }
 )
 ```
+**For v2 routes**
+```ruby
+
+playlyfe = Playlyfe.new(
+  client_id: 'Your Playlyfe game client id',
+  client_secret: 'Your Playlyfe game client secret',
+  type: 'client'
+)
+# To get infomation of the player johny
+player = playlyfe.get(
+  route: '/runtime/player',
+  query: { player_id: 'johny' }
+)
+puts player['id']
+puts player['scores']
+
+# To get all available processes with query
+processes = playlyfe.get(
+  route: '/runtime/processes',
+  query: { player_id: 'johny' }
+)
+puts processes
+# To start a process
+process =  playlyfe.post(
+  route: "/runtime/processes",
+  query: { player_id: 'johny' },
+  body: { name: "My First Process" }
+)
+
+#To play a process
+playlyfe.post(
+  route: "/runtime/processes/#{@process_id}/play",
+  query: { player_id: 'johny' },
+  body: { trigger: "#{@trigger}" }
+)
+
+```
 ## 1. Client Credentials Flow
 In your Application class add this so the Playlyfe SDK will be initialized at the start of your app. A typical rails app using client credentials code flow would look something like this
 **config/application.rb**
@@ -87,7 +141,7 @@ This is where we make an api request to the Playlyfe Platform the fetch all the 
 ```ruby
 class WelcomeController < ApplicationController
   def index
-    @players = playlyfe.get(route: '/players', query: { player_id: 'johny' })
+    @players = playlyfe.get(route: '/runtime/players', query: { player_id: 'johny' })
   end
 end
 ```
@@ -153,7 +207,7 @@ class WelcomeController < ApplicationController
   end
 
   def home
-    @players = playlyfe.get(route: '/players', query: { player_id: 'johny' })
+    @players = playlyfe.get(route: '/runtime/players', query: { player_id: 'johny' })
   end
 end
 ```
@@ -199,7 +253,7 @@ and you can directly refer to the urls of the image
 ```ruby
 def image
     response = playlyfe.get(
-      route: "/assets/players/#{session[:player_id]}",
+      route: "/runtime/assets/players/#{session[:player_id]}",
       query: { player_id: session[:player_id] }
       raw: true
     )
@@ -307,7 +361,7 @@ A ```PlaylyfeError``` is thrown whenever an error occurs in each call.The Error 
 
 License
 =======
-Playlyfe Ruby SDK v0.6.0  
+Playlyfe Ruby SDK v0.7.0  
 http://dev.playlyfe.com/  
 Copyright(c) 2013-2014, Playlyfe IT Solutions Pvt. Ltd, support@playlyfe.com  
 

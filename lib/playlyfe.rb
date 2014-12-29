@@ -18,7 +18,6 @@ class PlaylyfeError < StandardError
 end
 
 class Playlyfe
-  @@api = 'https://api.playlyfe.com/v1'
 
   def initialize(options = {})
     if options[:type].nil?
@@ -27,16 +26,17 @@ class Playlyfe
       err.message = "You must pass in a type whether 'client' for client credentials flow or 'code' for auth code flow"
       raise err
     end
-    @@type = options[:type]
-    @@id = options[:client_id]
-    @@secret = options[:client_secret]
-    @@store = options[:store]
-    @@load = options[:load]
-    @@redirect_uri = options[:redirect_uri]
-    if @@store.nil?
-      @@store = lambda { |token| puts 'Storing Token' }
+    @version = options[:version] ||= 'v1'
+    @type = options[:type]
+    @id = options[:client_id]
+    @secret = options[:client_secret]
+    @store = options[:store]
+    @load = options[:load]
+    @redirect_uri = options[:redirect_uri]
+    if @store.nil?
+      @store = lambda { |token| puts 'Storing Token' }
     end
-    if @@type == 'client'
+    if @type == 'client'
       get_access_token()
     else
       if options[:redirect_uri].nil?
@@ -50,11 +50,11 @@ class Playlyfe
 
   def get_access_token
     begin
-      if @@type == 'client'
+      if @type == 'client'
         access_token = RestClient.post('https://playlyfe.com/auth/token',
           {
-            :client_id => @@id,
-            :client_secret => @@secret,
+            :client_id => @id,
+            :client_secret => @secret,
             :grant_type => 'client_credentials'
           }.to_json,
           :content_type => :json,
@@ -63,11 +63,11 @@ class Playlyfe
       else
         access_token = RestClient.post("https://playlyfe.com/auth/token",
           {
-            :client_id => @@id,
-            :client_secret => @@secret,
+            :client_id => @id,
+            :client_secret => @secret,
             :grant_type => 'authorization_code',
-            :code => @@code,
-            :redirect_uri => @@redirect_uri
+            :code => @code,
+            :redirect_uri => @redirect_uri
           }.to_json,
           :content_type => :json,
           :accept => :json
@@ -77,13 +77,13 @@ class Playlyfe
       expires_at ||= Time.now.to_i + access_token['expires_in']
       access_token.delete('expires_in')
       access_token['expires_at'] = expires_at
-      @@store.call access_token
-      if @@load.nil?
-        @@load = lambda { return access_token }
+      @store.call access_token
+      if @load.nil?
+        @load = lambda { return access_token }
       else
-        old_token = @@load.call
+        old_token = @load.call
         if access_token != old_token
-          @@load = lambda { return access_token }
+          @load = lambda { return access_token }
         end
       end
     rescue => e
@@ -92,11 +92,11 @@ class Playlyfe
   end
 
   def check_token(options)
-    access_token = @@load.call
+    access_token = @load.call
     if access_token['expires_at'] < Time.now.to_i
       puts 'Access Token Expired'
       get_access_token()
-      access_token = @@load.call
+      access_token = @load.call
     end
     options[:query][:access_token] = access_token['access_token']
   end
@@ -110,29 +110,29 @@ class Playlyfe
     begin
       case options[:method]
         when 'GET'
-          res = RestClient.get("#{@@api}#{options[:route]}",
+          res = RestClient.get("https://api.playlyfe.com/#{@version}#{options[:route]}",
             {:params => options[:query] }
           )
         when 'POST'
-          res = RestClient.post("#{@@api}#{options[:route]}?#{hash_to_query(options[:query])}",
+          res = RestClient.post("https://api.playlyfe.com/#{@version}#{options[:route]}?#{hash_to_query(options[:query])}",
             options[:body].to_json,
             :content_type => :json,
             :accept => :json
           )
         when 'PUT'
-          res = RestClient.put("#{@@api}#{options[:route]}?#{hash_to_query(options[:query])}",
+          res = RestClient.put("https://api.playlyfe.com/#{@version}#{options[:route]}?#{hash_to_query(options[:query])}",
             options[:body].to_json,
             :content_type => :json,
             :accept => :json
           )
         when 'PATCH'
-          res = RestClient.patch("#{@@api}#{options[:route]}?#{hash_to_query(options[:query])}",
+          res = RestClient.patch("https://api.playlyfe.com/#{@version}#{options[:route]}?#{hash_to_query(options[:query])}",
             options[:body].to_json,
             :content_type => :json,
             :accept => :json
           )
         when 'DELETE'
-          res = RestClient.delete("#{@@api}#{options[:route]}",
+          res = RestClient.delete("https://api.playlyfe.com/#{@version}#{options[:route]}",
             {:params => options[:query] }
           )
       end
@@ -142,6 +142,8 @@ class Playlyfe
         return JSON.parse(res.body)
       end
     rescue => e
+      puts e
+      puts e.response
       raise PlaylyfeError.new(e.response)
     end
   end
@@ -176,7 +178,7 @@ class Playlyfe
   end
 
   def get_login_url
-    query = { response_type: 'code', redirect_uri: @@redirect_uri, client_id: @@id }
+    query = { response_type: 'code', redirect_uri: @redirect_uri, client_id: @id }
     "https://playlyfe.com/auth?#{hash_to_query(query)}"
   end
 
@@ -191,7 +193,7 @@ class Playlyfe
       err.message = 'You must pass in a code in exchange_code for the auth code flow'
       raise err
     else
-      @@code = code
+      @code = code
       get_access_token()
     end
   end
