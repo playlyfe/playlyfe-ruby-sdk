@@ -7,13 +7,16 @@ It supports the `client_credentials` and `authorization code` OAuth 2.0 flows.
 For a complete API Reference checkout [Playlyfe Developers](https://dev.playlyfe.com/docs/api) for more information.
 
 > Note: Breaking Changes this is the new version of the sdk which uses the Playlyfe api v2 (version 2) by default if you still want to use the v1 api you can do that so by passing a version key in the options when creating a client with 'v1' as the value
+
 ex: 
+```ruby
     playlyfe = Playlyfe.new(
       version: 'v1'
       client_id: 'Your Playlyfe game client id',
       client_secret: 'Your Playlyfe game client secret',
       type: 'client'
     )
+```
 
 Requires
 --------
