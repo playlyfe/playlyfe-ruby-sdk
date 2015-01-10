@@ -162,6 +162,22 @@ class PlaylyfeTest < Test::Unit::TestCase
 
     raw_data = pl.get(route: '/runtime/player', query: { player_id: player_id }, raw: true)
     assert_equal raw_data.class, String
+
+    new_metric = pl.post(route: '/design/versions/latest/metrics', query: {}, body: {
+      id: 'apple',
+      name: 'apple',
+      type: 'point',
+      image: 'default-point-metric',
+      description: '',
+      constraints: {
+        default: '0',
+        max: 'Infinity',
+        min: '0'
+      }
+    });
+    assert_equal new_metric['id'], 'apple'
+    deleted_metric = pl.delete(route: '/design/versions/latest/metrics/apple')
+    assert_equal deleted_metric['message'], "The metric 'apple' has been deleted successfully"
   end
 
   def test_init_production
@@ -171,7 +187,7 @@ class PlaylyfeTest < Test::Unit::TestCase
       client_secret: "NDc3NTA0NmItMjBkZi00MjI2LWFhMjUtOTI0N2I1YTkxYjc2M2U3ZGI0MDAtNGQ1Mi0xMWU0LWJmZmUtMzkyZTdiOTYxYmMx",
       type: 'client'
     )
-    players = pl.get(route: '/game/players', query: { limit: 1 })
+    pl.get(route: '/game/players', query: { limit: 1 })
   end
 
   def test_store
