@@ -363,7 +363,7 @@ A ```PlaylyfeError``` is thrown whenever an error occurs in each call.The Error 
 
 License
 =======
-Playlyfe Ruby SDK v0.7.0  
+Playlyfe Ruby SDK v0.7.1  
 http://dev.playlyfe.com/  
 Copyright(c) 2013-2014, Playlyfe IT Solutions Pvt. Ltd, support@playlyfe.com  
 

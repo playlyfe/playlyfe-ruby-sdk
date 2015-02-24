@@ -19,6 +19,7 @@ class PlaylyfeError < StandardError
 end
 
 class Playlyfe
+  attr_reader :sdk_version
 
   def initialize(options = {})
     if options[:type].nil?
@@ -27,6 +28,7 @@ class Playlyfe
       err.message = "You must pass in a type whether 'client' for client credentials flow or 'code' for auth code flow"
       raise err
     end
+    @sdk_version = '0.7.1'
     @version = options[:version] ||= 'v1'
     @type = options[:type]
     @id = options[:client_id]

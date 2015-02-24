@@ -4,6 +4,16 @@ require 'playlyfe'
 
 class PlaylyfeTest < Test::Unit::TestCase
 
+  def test_version
+    pl = Playlyfe.new(
+      version: 'v1',
+      client_id: "Zjc0MWU0N2MtODkzNS00ZWNmLWEwNmYtY2M1MGMxNGQ1YmQ4",
+      client_secret: "YzllYTE5NDQtNDMwMC00YTdkLWFiM2MtNTg0Y2ZkOThjYTZkMGIyNWVlNDAtNGJiMC0xMWU0LWI2NGEtYjlmMmFkYTdjOTI3",
+      type: 'client'
+    )
+    assert_equal pl.sdk_version, '0.7.1'
+  end
+
   def test_invalid_client
     begin
       Playlyfe.new(
