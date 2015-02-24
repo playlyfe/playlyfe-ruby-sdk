@@ -7,6 +7,7 @@ class PlaylyfeError < StandardError
   def initialize(res)
     message = []
     begin
+      @raw = res
       res = JSON.parse(res)
       @name = res['error']
       @message = res['error_description']
@@ -139,11 +140,13 @@ class Playlyfe
       if options[:raw] == true
         return res.body
       else
-        return JSON.parse(res.body)
+        if res.body == 'null'
+          return nil
+        else
+          return JSON.parse(res.body)
+        end
       end
     rescue => e
-      puts e
-      puts e.response
       raise PlaylyfeError.new(e.response)
     end
   end
