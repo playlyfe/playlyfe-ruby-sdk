@@ -1,6 +1,7 @@
 require 'uri'
 require 'json'
 require 'rest_client'
+require 'jwt'
 
 class PlaylyfeError < StandardError
   attr_accessor :name, :message
@@ -20,6 +21,15 @@ end
 
 class Playlyfe
   attr_reader :sdk_version
+
+  def self.createJWT(options)
+    options[:scopes] ||= []
+    options[:expires] ||= 3600
+    expires = Time.now.to_i + options[:expires]
+    token = JWT.encode({:player_id => options[:player_id], :scopes => options[:scopes], :exp => expires}, options[:client_secret], 'HS256')
+    token = "#{options[:client_id]}:#{token}"
+    return token
+  end
 
   def initialize(options = {})
     if options[:type].nil?

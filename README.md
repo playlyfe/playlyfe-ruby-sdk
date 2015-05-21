@@ -2,7 +2,7 @@
 
 Playlyfe Ruby SDK [![Gem Version](https://badge.fury.io/rb/playlyfe.svg)](http://badge.fury.io/rb/playlyfe)
 =================
-This is the official OAuth 2.0 PHP client SDK for the Playlyfe API.
+This is the official OAuth 2.0 Ruby client SDK for the Playlyfe API.
 It supports the `client_credentials` and `authorization code` OAuth 2.0 flows.
 For a complete API Reference checkout [Playlyfe Developers](https://dev.playlyfe.com/docs/api) for more information.
 
@@ -267,6 +267,18 @@ get 'image/:filename' => 'welcome#image'
 # Use it in your views like
 <%= image_tag "/image/user", :align => "left" %//>
 ```
+## 3. Custom Login Flow using JWT(JSON Web Token)
+```ruby
+token = Playlyfe.createJWT(
+    client_id: 'your client_id', 
+    client_secret: 'your client_secret', 
+    player_id: 'johny', # The player id associated with your user
+    scopes: ['player.runtime.read', 'player.runtime.write'], # The scopes the player has access to
+    expires: 3600; # 1 hour
+})
+```
+This is used to create jwt token which can be created when your user is authenticated. This token can then be sent to the frontend and or stored in your session. With this token the user can directly send requests to the Playlyfe API as the player.
+
 
 # Documentation
 You can initiate a client by giving the client_id and client_secret params
@@ -363,7 +375,7 @@ A ```PlaylyfeError``` is thrown whenever an error occurs in each call.The Error 
 
 License
 =======
-Playlyfe Ruby SDK v0.7.1  
+Playlyfe Ruby SDK v0.8.0  
 http://dev.playlyfe.com/  
 Copyright(c) 2013-2014, Playlyfe IT Solutions Pvt. Ltd, support@playlyfe.com  
 
