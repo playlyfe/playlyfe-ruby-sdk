@@ -242,7 +242,9 @@ class PlaylyfeTest < Test::Unit::TestCase
     token = Playlyfe.createJWT(
       client_id: "MWYwZGYzNTYtZGIxNy00OGM5LWExZGMtZjBjYTFiN2QxMTlh",
       client_secret: "NmM2YTcxOGYtNGE2ZC00ZDdhLTkyODQtYTIwZTE4ZDc5YWNjNWFiNzBiYjAtZmZiMC0xMWU0LTg5YzctYzc5NWNiNzA1Y2E4",
-      player_id: 'student1'
+      player_id: 'student1',
+      scopes: ['player.runtime.read'],
+      expires: 30
     )
     puts token
   end
