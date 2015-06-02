@@ -1,4 +1,4 @@
-![Playlyfe Ruby SDK](./images/pl-ruby-sdk.png "Playlyfe Ruby SDK")
+![Playlyfe Ruby SDK](https://dev.playlyfe.com/images/assets/pl-ruby-sdk.png "Playlyfe Ruby SDK")
 
 Playlyfe Ruby SDK [![Gem Version](https://badge.fury.io/rb/playlyfe.svg)](http://badge.fury.io/rb/playlyfe)
 =================
@@ -34,22 +34,6 @@ gem 'playlyfe'
 ```
 and do a bundle install
 
-Using
------
-### Create a client
-  If you haven't created a client for your game yet just head over to [Playlyfe](http://playlyfe.com) and login into your account, and go to the game settings and click on client
-  **1.Client Credentials Flow**
-    In the client page click on whitelabel client
-    ![Creating a Whitelabel Client](./images/client.png "Creating a Whitelabel Client")
-
-  **2.Authorization Code Flow**
-    In the client page click on backend client and specify the redirect uri this will be the url where you will be redirected to get the token
-    ![Creating a Backend Client](./images/auth.png "Creating a Backend Client")
-
-> Note: If you want to test the sdk in staging you can click the Test Client button. You need to pass the player_id in the query in every request also.
-
-  And then note down the client id and client secret you will need it later for using it in the sdk
-
 # Examples
 The Playlyfe class allows you to make rest api calls like GET, POST, .. etc
 **For v1 routes**
@@ -74,13 +58,6 @@ processes = playlyfe.get(
   query: { player_id: 'johny' }
 )
 puts processes
-# To start a process
-process =  playlyfe.post(
-  route: "/definitions/processes/collect",
-  query: { player_id: 'johny' },
-  body: { name: "My First Process" }
-)
-
 #To play a process
 playlyfe.post(
   route: "/processes/#{@process_id}/play",
@@ -102,29 +79,17 @@ player = playlyfe.get(
 )
 puts player['id']
 puts player['scores']
-
-# To get all available processes with query
-processes = playlyfe.get(
-  route: '/runtime/processes',
-  query: { player_id: 'johny' }
-)
-puts processes
-# To start a process
-process =  playlyfe.post(
-  route: "/runtime/processes",
-  query: { player_id: 'johny' },
-  body: { definition: 'collect', name: "My First Process" }
-)
-
-#To play a process
-playlyfe.post(
-  route: "/runtime/processes/#{@process_id}/play",
-  query: { player_id: 'johny' },
-  body: { trigger: "#{@trigger}" }
-)
-
 ```
+
+Using
+-----
+### Create a client
+  If you haven't created a client for your game yet just head over to [Playlyfe](http://playlyfe.com) and login into your account, and go to the game settings and click on client.
+
 ## 1. Client Credentials Flow
+In the client page select Yes for both the first and second questions
+![client](https://cloud.githubusercontent.com/assets/1687946/7930229/2c2f14fe-0924-11e5-8c3b-5ba0c10f066f.png)
+
 In your Application class add this so the Playlyfe SDK will be initialized at the start of your app. A typical rails app using client credentials code flow would look something like this
 **config/application.rb**
 This is where you will initialize the sdk with your client_id and client_secret
@@ -163,6 +128,8 @@ This will display the index page and list all the players in the game
 </div>
 ```
 ## 2. Authorization Code Flow
+In the client page select yes for the first question and no for the second
+![auth](https://cloud.githubusercontent.com/assets/1687946/7930231/2c31c1fe-0924-11e5-8cb5-73ca0a002bcb.png)
 ```ruby
 Playlyfe.new(
   client_id: 'Your Playlyfe game client id',
@@ -268,6 +235,8 @@ get 'image/:filename' => 'welcome#image'
 <%= image_tag "/image/user", :align => "left" %//>
 ```
 ## 3. Custom Login Flow using JWT(JSON Web Token)
+In the client page select no for the first question and yes for the second
+![jwt](https://cloud.githubusercontent.com/assets/1687946/7930230/2c2f2caa-0924-11e5-8dcf-aed914a9dd58.png)
 ```ruby
 token = Playlyfe.createJWT(
     client_id: 'your client_id', 
