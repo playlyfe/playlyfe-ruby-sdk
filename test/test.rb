@@ -1,5 +1,4 @@
 require 'test/unit'
-require 'redis'
 require 'playlyfe'
 
 class PlaylyfeTest < Test::Unit::TestCase
@@ -39,61 +38,58 @@ class PlaylyfeTest < Test::Unit::TestCase
     )
 
     begin
-      pl.get(route: '/gege', query: { player_id: 'student1' })
+      pl.get('/gege', { player_id: 'student1' })
     rescue PlaylyfeError => e
       assert_equal e.name,'route_not_found'
       assert_equal e.message, 'This route does not exist'
     end
 
-    players = pl.api(method: 'GET', route: '/players', query: { player_id: 'student1', limit: 1 })
+    players = pl.api('GET', '/players', { player_id: 'student1', limit: 1 })
     assert_not_nil players["data"]
     assert_not_nil players["data"][0]
 
-    players = pl.get(route: '/players', query: { player_id: 'student1', limit: 1 })
+    players = pl.get('/players', { player_id: 'student1', limit: 1 })
     assert_not_nil players["data"]
     assert_not_nil players["data"][0]
 
     begin
-      pl.get(route: '/player')
+      pl.get('/player')
     rescue PlaylyfeError => e
       assert_equal e.message, "The 'player_id' parameter should be specified in the query"
     end
 
     player_id = 'student1'
-    player = pl.get(route: '/player', query: { player_id: player_id } )
+    player = pl.get('/player', { player_id: player_id } )
     assert_equal player["id"], "student1"
     assert_equal player["alias"], "Student1"
     assert_equal player["enabled"], true
 
-    pl.get(route: '/definitions/processes', query: { player_id: player_id } )
-    pl.get(route:'/definitions/teams', query: { player_id: player_id } )
-    pl.get(route: '/processes', query: { player_id: player_id } )
-    pl.get(route: '/teams', query: { player_id: player_id } )
+    pl.get('/definitions/processes', { player_id: player_id } )
+    pl.get('/definitions/teams', { player_id: player_id } )
+    pl.get('/processes', { player_id: player_id } )
+    pl.get('/teams', { player_id: player_id } )
 
-    processes = pl.get(route: '/processes', query: { player_id: 'student1', limit: 1, skip: 4 })
+    processes = pl.get('/processes', { player_id: 'student1', limit: 1, skip: 4 })
     assert_equal processes["data"][0]["definition"], "module1"
     assert_equal processes["data"].size, 1
 
-    new_process = pl.post(route: '/definitions/processes/module1', query: { player_id: player_id })
+    new_process = pl.post('/definitions/processes/module1', { player_id: player_id })
     assert_equal new_process["definition"], "module1"
     assert_equal new_process["state"], "ACTIVE"
 
     patched_process = pl.patch(
-      route: "/processes/#{new_process['id']}",
-      query: { player_id: player_id },
-      body: { name: 'patched_process', access: 'PUBLIC' }
+      "/processes/#{new_process['id']}",
+      { player_id: player_id },
+      { name: 'patched_process', access: 'PUBLIC' }
     )
 
     assert_equal patched_process['name'], 'patched_process'
     assert_equal patched_process['access'], 'PUBLIC'
 
-    deleted_process = pl.delete(route: "/processes/#{new_process['id']}", query: { player_id: player_id })
+    deleted_process = pl.delete("/processes/#{new_process['id']}", { player_id: player_id })
     assert_not_nil deleted_process['message']
 
-    #data = pl.put(route: "/players/#{player_id}/reset", query: { player_id: player_id })
-    #puts data
-
-    raw_data = pl.get(route: '/player', query: { player_id: player_id }, raw: true)
+    raw_data = pl.get_raw('/player', { player_id: player_id })
     assert_equal raw_data.class, String
   end
 
@@ -105,64 +101,64 @@ class PlaylyfeTest < Test::Unit::TestCase
     )
 
     begin
-      pl.get(route: '/gege', query: { player_id: 'student1' })
+      pl.get('/gege', { player_id: 'student1' })
     rescue PlaylyfeError => e
       assert_equal e.name,'route_not_found'
       assert_equal e.message, 'This route does not exist'
     end
 
-    players = pl.api(method: 'GET', route: '/runtime/players', query: { player_id: 'student1', limit: 1 })
+    players = pl.api('GET', '/runtime/players', { player_id: 'student1', limit: 1 })
     assert_not_nil players["data"]
     assert_not_nil players["data"][0]
 
-    players = pl.get(route: '/runtime/players', query: { player_id: 'student1', limit: 1 })
+    players = pl.get('/runtime/players', { player_id: 'student1', limit: 1 })
     assert_not_nil players["data"]
     assert_not_nil players["data"][0]
 
     begin
-      pl.get(route: '/runtime/player')
+      pl.get('/runtime/player')
     rescue PlaylyfeError => e
       assert_equal e.message, "The 'player_id' parameter should be specified in the query"
     end
 
     player_id = 'student1'
-    player = pl.get(route: '/runtime/player', query: { player_id: player_id } )
+    player = pl.get('/runtime/player', { player_id: player_id } )
     assert_equal player["id"], "student1"
     assert_equal player["alias"], "Student1"
     assert_equal player["enabled"], true
 
-    pl.get(route: '/runtime/definitions/processes', query: { player_id: player_id } )
-    pl.get(route:'/runtime/definitions/teams', query: { player_id: player_id } )
-    pl.get(route: '/runtime/processes', query: { player_id: player_id } )
-    pl.get(route: '/runtime/teams', query: { player_id: player_id } )
+    pl.get('/runtime/definitions/processes', { player_id: player_id } )
+    pl.get('/runtime/definitions/teams', { player_id: player_id } )
+    pl.get('/runtime/processes', { player_id: player_id } )
+    pl.get('/runtime/teams', { player_id: player_id } )
 
-    processes = pl.get(route: '/runtime/processes', query: { player_id: 'student1', limit: 1, skip: 4 })
+    processes = pl.get('/runtime/processes', { player_id: 'student1', limit: 1, skip: 4 })
     assert_equal processes["data"][0]["definition"], "module1"
     assert_equal processes["data"].size, 1
 
-    new_process = pl.post(route: '/runtime/processes', query: { player_id: player_id }, body: { definition: 'module1' })
+    new_process = pl.post('/runtime/processes', { player_id: player_id }, { definition: 'module1' })
     assert_equal new_process["definition"]["id"], "module1"
     assert_equal new_process["state"], "ACTIVE"
 
     patched_process = pl.patch(
-      route: "/runtime/processes/#{new_process['id']}",
-      query: { player_id: player_id },
-      body: { name: 'patched_process', access: 'PUBLIC' }
+      "/runtime/processes/#{new_process['id']}",
+      { player_id: player_id },
+      { name: 'patched_process', access: 'PUBLIC' }
     )
 
     assert_equal patched_process['name'], 'patched_process'
     assert_equal patched_process['access'], 'PUBLIC'
 
-    deleted_process = pl.delete(route: "/runtime/processes/#{new_process['id']}", query: { player_id: player_id })
+    deleted_process = pl.delete("/runtime/processes/#{new_process['id']}", { player_id: player_id })
     assert_not_nil deleted_process['message']
 
-    #data = pl.put(route: "/players/#{player_id}/reset", query: { player_id: player_id })
+    #data = pl.put("/players/#{player_id}/reset", { player_id: player_id })
     #puts data
 
-    raw_data = pl.get(route: '/runtime/player', query: { player_id: player_id }, raw: true)
+    raw_data = pl.get_raw('/runtime/player', { player_id: player_id })
     assert_equal raw_data.class, String
 
-    new_metric = pl.post(route: '/design/versions/latest/metrics', query: {}, body: {
+    new_metric = pl.post('/design/versions/latest/metrics', {}, {
       id: 'apple',
       name: 'apple',
       type: 'point',
@@ -175,7 +171,7 @@ class PlaylyfeTest < Test::Unit::TestCase
       }
     });
     assert_equal new_metric['id'], 'apple'
-    deleted_metric = pl.delete(route: '/design/versions/latest/metrics/apple')
+    deleted_metric = pl.delete('/design/versions/latest/metrics/apple')
     assert_equal deleted_metric['message'], "The metric 'apple' has been deleted successfully"
   end
 
@@ -186,7 +182,7 @@ class PlaylyfeTest < Test::Unit::TestCase
       client_secret: "NDc3NTA0NmItMjBkZi00MjI2LWFhMjUtOTI0N2I1YTkxYjc2M2U3ZGI0MDAtNGQ1Mi0xMWU0LWJmZmUtMzkyZTdiOTYxYmMx",
       type: 'client'
     )
-    pl.get(route: '/game/players', query: { limit: 1 })
+    pl.get('/game/players', { limit: 1 })
   end
 
   def test_store
@@ -199,7 +195,7 @@ class PlaylyfeTest < Test::Unit::TestCase
       store: lambda { |token| access_token = token },
       load: lambda { return access_token }
     )
-    players = pl.get(route: '/players', query: { player_id: 'student1', limit: 1 })
+    players = pl.get('/players', { player_id: 'student1', limit: 1 })
     assert_not_nil players["data"]
     assert_not_nil players["data"][0]
   end

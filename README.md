@@ -6,7 +6,7 @@ This is the official OAuth 2.0 Ruby client SDK for the Playlyfe API.
 It supports the `client_credentials` and `authorization code` OAuth 2.0 flows.
 For a complete API Reference checkout [Playlyfe Developers](https://dev.playlyfe.com/docs/api) for more information.
 
-> Note: Breaking Changes this is the new version of the sdk which uses the Playlyfe api v2 by default if you still want to use the v1 api you can do that so by passing a version key in the options when creating a client with 'v1' as the value
+> Note: Breaking Changes the API has changed a lot from the previous version. It doesn't use named parameters anymore. You have to pass in all the params accordingly. Like method, route, query, body.
 
 ex: 
 ```ruby
@@ -45,38 +45,25 @@ playlyfe = Playlyfe.new(
   type: 'client'
 )
 # To get infomation of the player johny
-player = playlyfe.get(
-  route: '/player',
-  query: { player_id: 'johny' }
-)
+player = playlyfe.get('/player', { player_id: 'johny' })
 puts player['id']
 puts player['scores']
 
 # To get all available processes with query
-processes = playlyfe.get(
-  route: '/processes',
-  query: { player_id: 'johny' }
-)
+processes = playlyfe.get('/processes', { player_id: 'johny' })
 puts processes
 #To play a process
-playlyfe.post(
-  route: "/processes/#{@process_id}/play",
-  query: { player_id: 'johny' },
-  body: { trigger: "#{@trigger}" }
-)
+playlyfe.post("/processes/#{@process_id}/play", { player_id: 'johny' }, { trigger: "#{@trigger}" })
 ```
 **For v2 routes**
 ```ruby
-playlyfe = Playlyfe.new(
+pl = Playlyfe.new(
   client_id: 'Your Playlyfe game client id',
   client_secret: 'Your Playlyfe game client secret',
   type: 'client'
 )
 # To get infomation of the player johny
-player = playlyfe.get(
-  route: '/runtime/player',
-  query: { player_id: 'johny' }
-)
+player = pl.get('/runtime/player', { player_id: 'johny' })
 puts player['id']
 puts player['scores']
 ```
@@ -107,7 +94,7 @@ This is where we make an api request to the Playlyfe Platform the fetch all the 
 ```ruby
 class WelcomeController < ApplicationController
   def index
-    @players = playlyfe.get(route: '/runtime/players', query: { player_id: 'johny' })
+    @players = pl.get('/runtime/players', { player_id: 'johny' })
   end
 end
 ```
@@ -169,13 +156,13 @@ class WelcomeController < ApplicationController
       # here you need to add some logic if the user is logged in and
       # you need to redirect to the playlyfe login page if needed
     else
-      playlyfe.exchange_code(params['code'])
+      pl.exchange_code(params['code'])
       redirect_to :action => 'home'
     end
   end
 
   def home
-    @players = playlyfe.get(route: '/runtime/players', query: { player_id: 'johny' })
+    @players = pl.get('/runtime/players', { player_id: 'johny' })
   end
 end
 ```
@@ -185,7 +172,7 @@ This is the main index page. It will redirect the user to login into playlyfe
 <div class="container">
 <div class="form-signin">
 Please sign in using the Playlyfe Platform
-<a href=<%= playlyfe.get_auth_url() %>> Login </a>
+<a href=<%= pl.get_auth_url() %>> Login </a>
 </div>
 </div>
 ```
@@ -220,10 +207,7 @@ For Images create a proxy route which can be used to get the images
 and you can directly refer to the urls of the image
 ```ruby
 def image
-    response = playlyfe.get(
-      route: "/runtime/assets/players/#{session[:player_id]}",
-      query: { player_id: session[:player_id] }
-      raw: true
+    response = pl.get_raw("/runtime/assets/players/#{session[:player_id]}", { player_id: session[:player_id] }
     )
     send_data response, :type =>'image/png', :disposition => 'iniline'
 end
@@ -281,49 +265,57 @@ In development the sdk caches the access token in memory so you don't need to pr
 **API**
 ```ruby
 api(
-    method: 'GET' # The request method can be GET/POST/PUT/PATCH/DELETE
-    route: '' # The api route to get data from
-    query: {} # The query params that you want to send to the route
-    raw: false # Whether you want the response to be in raw string form or json
+    'GET' # The request method can be GET/POST/PUT/PATCH/DELETE
+    '' # The api route to get data from
+    {} # The query params that you want to send to the route
+    {} # The data you want to post to the api this will be automagically converted to json
+    false # Whether you want the response to be in raw string form or json
 )
 ```
 **Get**
 ```ruby
 get(
-    route: '' # The api route to get data from
-    query: {} # The query params that you want to send to the route
-    raw: false # Whether you want the response to be in raw string form or json
+    '' # The api route to get data from
+    {} # The query params that you want to send to the route
+)
+```
+**Get Raw**
+This returns the raw response from the request. Useful for images.
+```ruby
+get_raw(
+    '' # The api route to get data from
+    {} # The query params that you want to send to the route
 )
 ```
 **Post**
 ```ruby
 post(
-    route: '' # The api route to post data to
-    query: {} # The query params that you want to send to the route
-    body: {} # The data you want to post to the api this will be automagically converted to json
+    '' # The api route to post data to
+    {} # The query params that you want to send to the route
+    {} # The data you want to post to the api this will be automagically converted to json
 )
 ```
 **Patch**
 ```ruby
 patch(
-    route: '' # The api route to patch data
-    query: {} # The query params that you want to send to the route
-    body: {} # The data you want to update in the api this will be automagically converted to json
+    '' # The api route to patch data
+    {} # The query params that you want to send to the route
+    {} # The data you want to update in the api this will be automagically converted to json
 )
 ```
 **Put**
 ```ruby
 put(
-    route: '' # The api route to put data
-    query: {} # The query params that you want to send to the route
-    body: {} # The data you want to update in the api this will be automagically converted to json
+    '' # The api route to put data
+    {} # The query params that you want to send to the route
+    {} # The data you want to update in the api this will be automagically converted to json
 )
 ```
 **Delete**
 ```ruby
 delete(
-    route: '' # The api route to delete the component
-    query: {} # The query params that you want to send to the route
+    '' # The api route to delete the component
+    {} # The query params that you want to send to the route
 )
 ```
 **Get Login Url**

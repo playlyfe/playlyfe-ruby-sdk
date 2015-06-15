@@ -103,52 +103,48 @@ class Playlyfe
     end
   end
 
-  def check_token(options)
+  def check_token(query)
     access_token = @load.call
     if access_token['expires_at'] < Time.now.to_i
       puts 'Access Token Expired'
       get_access_token()
       access_token = @load.call
     end
-    options[:query][:access_token] = access_token['access_token']
+    query[:access_token] = access_token['access_token']
   end
 
-  def api(options = {})
-    options[:route] ||= ''
-    options[:query] ||= {}
-    options[:body] ||= {}
-    options[:raw] ||= false
-    check_token(options)
+  def api(method, route, query = {}, body = {}, raw = false)
+    check_token(query)
     begin
-      case options[:method]
+      case method
         when 'GET'
-          res = RestClient.get("https://api.playlyfe.com/#{@version}#{options[:route]}",
-            {:params => options[:query] }
+          res = RestClient.get("https://api.playlyfe.com/#{@version}#{route}",
+            {:params => query }
           )
         when 'POST'
-          res = RestClient.post("https://api.playlyfe.com/#{@version}#{options[:route]}?#{hash_to_query(options[:query])}",
-            options[:body].to_json,
+          res = RestClient.post("https://api.playlyfe.com/#{@version}#{route}?#{hash_to_query(query)}",
+            body.to_json,
             :content_type => :json,
             :accept => :json
           )
         when 'PUT'
-          res = RestClient.put("https://api.playlyfe.com/#{@version}#{options[:route]}?#{hash_to_query(options[:query])}",
-            options[:body].to_json,
+          res = RestClient.put("https://api.playlyfe.com/#{@version}#{route}?#{hash_to_query(query)}",
+            body.to_json,
             :content_type => :json,
             :accept => :json
           )
         when 'PATCH'
-          res = RestClient.patch("https://api.playlyfe.com/#{@version}#{options[:route]}?#{hash_to_query(options[:query])}",
-            options[:body].to_json,
+          res = RestClient.patch("https://api.playlyfe.com/#{@version}#{route}?#{hash_to_query(query)}",
+            body.to_json,
             :content_type => :json,
             :accept => :json
           )
         when 'DELETE'
-          res = RestClient.delete("https://api.playlyfe.com/#{@version}#{options[:route]}",
-            {:params => options[:query] }
+          res = RestClient.delete("https://api.playlyfe.com/#{@version}#{route}",
+            {:params => query }
           )
       end
-      if options[:raw] == true
+      if raw == true
         return res.body
       else
         if res.body == 'null'
@@ -162,29 +158,28 @@ class Playlyfe
     end
   end
 
-  def get(options = {})
-    options[:method] = "GET"
-    api(options)
+  def get(route, query = {})
+    api("GET", route, query, {}, false)
   end
 
-  def post(options = {})
-    options[:method] = "POST"
-    api(options)
+  def get_raw(route, query = {})
+    api("GET", route, query, {}, true)
   end
 
-  def put(options = {})
-    options[:method] = "PUT"
-    api(options)
+  def post(route, query = {}, body = {})
+    api("POST", route, query, body, false)
   end
 
-  def patch(options = {})
-    options[:method] = "PATCH"
-    api(options)
+  def put(route, query = {}, body = {})
+    api("PUT", route, query, body, false)
   end
 
-  def delete(options = {})
-    options[:method] = "DELETE"
-    api(options)
+  def patch(route, query = {}, body = {})
+    api("PATCH", route, query, body, false)
+  end
+
+  def delete(route, query = {})
+    api("DELETE", route, query, {}, false)
   end
 
   def hash_to_query(hash)
