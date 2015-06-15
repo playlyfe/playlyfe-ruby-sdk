@@ -4,16 +4,6 @@ require 'playlyfe'
 
 class PlaylyfeTest < Test::Unit::TestCase
 
-  def test_version
-    pl = Playlyfe.new(
-      version: 'v1',
-      client_id: "Zjc0MWU0N2MtODkzNS00ZWNmLWEwNmYtY2M1MGMxNGQ1YmQ4",
-      client_secret: "YzllYTE5NDQtNDMwMC00YTdkLWFiM2MtNTg0Y2ZkOThjYTZkMGIyNWVlNDAtNGJiMC0xMWU0LWI2NGEtYjlmMmFkYTdjOTI3",
-      type: 'client'
-    )
-    assert_equal pl.sdk_version, '0.7.1'
-  end
-
   def test_invalid_client
     begin
       Playlyfe.new(
@@ -109,7 +99,6 @@ class PlaylyfeTest < Test::Unit::TestCase
 
   def test_init_staging_v2
     pl = Playlyfe.new(
-      version: 'v2',
       client_id: "Zjc0MWU0N2MtODkzNS00ZWNmLWEwNmYtY2M1MGMxNGQ1YmQ4",
       client_secret: "YzllYTE5NDQtNDMwMC00YTdkLWFiM2MtNTg0Y2ZkOThjYTZkMGIyNWVlNDAtNGJiMC0xMWU0LWI2NGEtYjlmMmFkYTdjOTI3",
       type: 'client'
@@ -201,14 +190,14 @@ class PlaylyfeTest < Test::Unit::TestCase
   end
 
   def test_store
-    redis = Redis.new
+    access_token = nil
     pl = Playlyfe.new(
       version: 'v1',
       client_id: "Zjc0MWU0N2MtODkzNS00ZWNmLWEwNmYtY2M1MGMxNGQ1YmQ4",
       client_secret: "YzllYTE5NDQtNDMwMC00YTdkLWFiM2MtNTg0Y2ZkOThjYTZkMGIyNWVlNDAtNGJiMC0xMWU0LWI2NGEtYjlmMmFkYTdjOTI3",
       type: 'client',
-      store: lambda { |token| redis.set('token', JSON.generate(token)) },
-      load: lambda { return JSON.parse(redis.get('token')) }
+      store: lambda { |token| access_token = token },
+      load: lambda { return access_token }
     )
     players = pl.get(route: '/players', query: { player_id: 'student1', limit: 1 })
     assert_not_nil players["data"]
