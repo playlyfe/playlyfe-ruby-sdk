@@ -63,26 +63,32 @@ class Playlyfe
   def get_access_token
     begin
       if @type == 'client'
-        access_token = RestClient.post('https://playlyfe.com/auth/token',
-          {
+        access_token = RestClient::Request.execute(:method => :post, :url => 'https://playlyfe.com/auth/token',
+          :payload => {
             :client_id => @id,
             :client_secret => @secret,
             :grant_type => 'client_credentials'
           }.to_json,
-          :content_type => :json,
-          :accept => :json
+          :headers => {
+            :content_type => :json,
+            :accepts => :json
+          },
+          :ssl_version => 'SSLv23'
         )
       else
-        access_token = RestClient.post("https://playlyfe.com/auth/token",
-          {
+        access_token = RestClient::Request.execute(:method => :post, :url => "https://playlyfe.com/auth/token",
+          :payload => {
             :client_id => @id,
             :client_secret => @secret,
             :grant_type => 'authorization_code',
             :code => @code,
             :redirect_uri => @redirect_uri
           }.to_json,
-          :content_type => :json,
-          :accept => :json
+          :headers => {
+            :content_type => :json,
+            :accepts => :json
+          },
+          :ssl_version => 'SSLv23'
         )
       end
       access_token = JSON.parse(access_token)
@@ -111,39 +117,22 @@ class Playlyfe
       access_token = @load.call
     end
     query[:access_token] = access_token['access_token']
+    query = hash_to_query(query)
   end
 
   def api(method, route, query = {}, body = {}, raw = false)
-    check_token(query)
+    query = check_token(query)
     begin
-      case method
-        when 'GET'
-          res = RestClient.get("https://api.playlyfe.com/#{@version}#{route}",
-            {:params => query }
-          )
-        when 'POST'
-          res = RestClient.post("https://api.playlyfe.com/#{@version}#{route}?#{hash_to_query(query)}",
-            body.to_json,
-            :content_type => :json,
-            :accept => :json
-          )
-        when 'PUT'
-          res = RestClient.put("https://api.playlyfe.com/#{@version}#{route}?#{hash_to_query(query)}",
-            body.to_json,
-            :content_type => :json,
-            :accept => :json
-          )
-        when 'PATCH'
-          res = RestClient.patch("https://api.playlyfe.com/#{@version}#{route}?#{hash_to_query(query)}",
-            body.to_json,
-            :content_type => :json,
-            :accept => :json
-          )
-        when 'DELETE'
-          res = RestClient.delete("https://api.playlyfe.com/#{@version}#{route}",
-            {:params => query }
-          )
-      end
+      res = RestClient::Request.execute(
+        :method => method,
+        :url => "https://api.playlyfe.com/#{@version}#{route}?#{query}",
+        :headers => {
+          :content_type => :json,
+          :accepts => :json
+        },
+        :payload => body.to_json,
+        :ssl_version => 'SSLv23'
+      )
       if raw == true
         return res.body
       else
@@ -159,27 +148,27 @@ class Playlyfe
   end
 
   def get(route, query = {})
-    api("GET", route, query, {}, false)
+    api(:get, route, query, {}, false)
   end
 
   def get_raw(route, query = {})
-    api("GET", route, query, {}, true)
+    api(:get, route, query, {}, true)
   end
 
   def post(route, query = {}, body = {})
-    api("POST", route, query, body, false)
+    api(:post, route, query, body, false)
   end
 
   def put(route, query = {}, body = {})
-    api("PUT", route, query, body, false)
+    api(:put, route, query, body, false)
   end
 
   def patch(route, query = {}, body = {})
-    api("PATCH", route, query, body, false)
+    api(:patch, route, query, body, false)
   end
 
   def delete(route, query = {})
-    api("DELETE", route, query, {}, false)
+    api(:delete, route, query, {}, false)
   end
 
   def hash_to_query(hash)
