@@ -332,6 +332,7 @@ exchange_code(code)
 #This should be called in the the route/controller which you specified in your redirect_uri
 ```
 **Errors**
+
 A ```PlaylyfeError``` is thrown whenever an error occurs in each call.The Error contains a name and message field which can be used to determine the type of error that occurred.
 
 License
