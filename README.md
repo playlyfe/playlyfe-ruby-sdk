@@ -8,7 +8,7 @@ For a complete API Reference checkout [Playlyfe Developers](https://dev.playlyfe
 
 > Note: Breaking Changes the API has changed a lot from the previous version. It doesn't use named parameters anymore. You have to pass in all the params accordingly. Like method, route, query, body.
 
-ex: 
+ex:
 ```ruby
     playlyfe = Playlyfe.new(
       version: 'v1'
@@ -223,8 +223,8 @@ In the client page select no for the first question and yes for the second
 ![jwt](https://cloud.githubusercontent.com/assets/1687946/7930230/2c2f2caa-0924-11e5-8dcf-aed914a9dd58.png)
 ```ruby
 token = Playlyfe.createJWT(
-    client_id: 'your client_id', 
-    client_secret: 'your client_secret', 
+    client_id: 'your client_id',
+    client_secret: 'your client_secret',
     player_id: 'johny', # The player id associated with your user
     scopes: ['player.runtime.read', 'player.runtime.write'], # The scopes the player has access to
     expires: 3600 # 1 hour
@@ -331,14 +331,16 @@ exchange_code(code)
 #Before any request to the playlyfe api is made this has to be called atleast once.
 #This should be called in the the route/controller which you specified in your redirect_uri
 ```
-**Errors**  
+**Errors**
 A ```PlaylyfeError``` is thrown whenever an error occurs in each call.The Error contains a name and message field which can be used to determine the type of error that occurred.
 
 License
 =======
-Playlyfe Ruby SDK  
-http://dev.playlyfe.com/  
-Copyright(c) 2013-2014, Playlyfe IT Solutions Pvt. Ltd, support@playlyfe.com  
+Playlyfe Ruby SDK
+
+http://dev.playlyfe.com/
+
+Copyright(c) 2013-2014, Playlyfe IT Solutions Pvt. Ltd, support@playlyfe.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -357,3 +359,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+Contributing
+============
+```ruby
+gem build playlyfe.gemspec
+gem push playlyfe.gem
+```
